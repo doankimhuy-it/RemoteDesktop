@@ -8,6 +8,7 @@ from get_mac_address import GetMACAddressDialog
 from key_control import KeyControlDialog
 from power import PowerDialog
 from file_explorer import FileExplorerDialog
+from file_explorer import *
 
 class ControlDiag(QtWidgets.QDialog):
     def __init__(self, sock):
