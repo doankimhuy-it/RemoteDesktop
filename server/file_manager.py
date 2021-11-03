@@ -1,11 +1,37 @@
+import json
 from subprocess import *
 import os
+import string
 
 class FileManager:
     def __init__(self, sock, request, filename):
         self.sock = sock
         self.request = request
         self.filename = filename
+
+    def get_base_file_directory(self):
+        dir = []
+        for startpath in string.ascii_uppercase:
+            path = '{}:\\'.format(startpath)
+            check = os.path.exists(path)
+            if check:
+                # (root, dirs, files) = os.walk(path)
+                # dir += (root, dirs, files)
+                for (root, dirs, files) in os.walk(path):
+                    print(root)
+                    dir.append(root)
+                    break
+        myDir = ",".join(dir)
+        print(myDir)
+        message = {'type': '', 'request': '', 'data': myDir}
+        self.sock.sendall(json.dumps(message).encode('utf-8'))
+        
+    def get_file_directory(self, path):
+        if (os.path.isdir(path)):
+            (root, dirs, files) = os.walk(path)
+            dir = ','.join(root, dirs, files)
+            self.sock.sendall(json.dumps(dir).encode('utf-8'))
+
 
     def copy_file(self):
         file = open(self.filename, 'wb')
@@ -23,3 +49,7 @@ class FileManager:
             self.copy_file()
         elif self.request == 'delete':
             self.delete_file()
+        elif self.request == 'get':
+            self.get_base_file_directory()
+        elif self.request == 'get_child_dir':
+            self.get_file_directory()
