@@ -46,9 +46,11 @@ class KeyControlDialog(QtWidgets.QDialog):
         self.unlock_button.clicked.connect(self.click_unlock_button)
 
     def click_hook_button(self):
-        message_to_send = {'type': 'key_control', 'request': 'hook_key', 'data': ''}
+        message_to_send = {'type': 'key_control',
+                           'request': 'hook_key', 'data': ''}
         self.sock.sendall(json.dumps(message_to_send).encode(('utf-8')))
 
+        #self.receive_data()
         list_key_thread = threading.Thread(target=self.receive_data)
         list_key_thread.start()
 
@@ -59,17 +61,16 @@ class KeyControlDialog(QtWidgets.QDialog):
 
     def receive_data(self):
         key_str = ''
-        while True:
-            message_recvd = self.sock.recv(1024)
-            key_str += str.format(message_recvd.decode('utf-8'))
-            if not message_recvd:
-                break
-        print(key_str)
-        self.result_box.setText(str(key_str))
+        message_recvd = self.sock.recv(1024).decode('utf-8')
+        while message_recvd and message_recvd[-2:] != '\r\n':
+            key_str += message_recvd
+            message_recvd = self.sock.recv(1024).decode('utf-8')
+            print(key_str)
+            self.result_box.setText(str(key_str))
 
     def click_clear_button(self):
         self.result_box.clear()
-    
+
     def click_lock_button(self):
         message_to_send = {'type': 'key_control',
                            'request': 'lock_key', 'data': ''}

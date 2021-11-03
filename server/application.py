@@ -1,4 +1,3 @@
-import json
 import psutil
 import ctypes
 
@@ -12,20 +11,10 @@ GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
 IsWindowVisible = ctypes.windll.user32.IsWindowVisible
 GetWindowThreadProcessId = ctypes.windll.user32.GetWindowThreadProcessId
 
-class Application:
+class Application(Process):
     def __init__(self, sock, request, data):
-        self._sock = sock
-        self.request = request
-        self.data = data
+        super().__init__(sock, request, data)
         self.list_app_data = []
-
-    def do_task(self):
-        if self.opcode == 'get_list':
-            self.send_process_list()
-        if self.opcode == 'kill_process':
-            self.kill_proc_tree(pid=int(self.message))
-        if self.opcode == 'start_process':
-            self.start_process(self.message)
 
     def foreach_window(self, hwnd, lParam):
         if IsWindowVisible(hwnd):
@@ -35,8 +24,7 @@ class Application:
                 GetWindowText(hwnd, name, length + 1)
 
                 pid = ctypes.c_ulong()
-                result = ctypes.windll.user32.GetWindowThreadProcessId(
-                    hwnd, ctypes.byref(pid))
+                result = GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
                 process_id = pid.value
 
                 self.list_app_data.append([name.value, pid.value])
@@ -46,11 +34,12 @@ class Application:
         EnumWindows(EnumWindowsProc(self.foreach_window), 0)
         for proc in self.list_app_data:
             try:
-                # Get process name & pid from process object.
+                # get process name & pid from process object
                 process_name = proc[0]
                 process_id = proc[1]
-                message = {'request': '', 'data': process_name +
-                           ',' + str(process_id) + '~'}
-                self.sock.sendall(json.dumps(message).encode('utf-8'))
+                message = process_name + ',' + str(process_id) + '~'
+                self.sock.sendall(message.encode('utf-8'))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
+        end_message = '\r\n'
+        self.sock.sendall(end_message.encode('utf-8'))

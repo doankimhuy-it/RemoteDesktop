@@ -25,9 +25,9 @@ class ServerConnection:
         self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sel.register(self.server_sock, selectors.EVENT_READ, data=None)
         self.server_sock.bind((self.host, self.port))
-        
+
         self.server_sock.listen(10)  # accept 10 connections
-        
+
         # set to start listening flag, 1 is one socket (server_sock)
         self.connection_status = 1
         logging.debug('Listening on {} : {}'.format(self.host, self.port))

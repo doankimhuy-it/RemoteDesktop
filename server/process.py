@@ -21,20 +21,23 @@ class Process:
         if self.request == 'get_list':
             self.send_process_list()
         if self.request == 'kill_process':
-            self.kill_proc_tree(pid=int(self.message))
+            self.kill_proc_tree(pid=int(self.data))
         if self.request == 'start_process':
-            self.start_process(self.message)
+            self.start_process(self.data)
 
     def send_process_list(self):
+        message = ''
         for proc in psutil.process_iter():
             try:
-                # get process name & pid from process object.
+                # get process name & pid from process object
                 process_name = proc.name()
                 process_id = proc.pid
-                message = {'request': '', 'data': process_name + ',' + str(process_id) + '~'}
-                self.sock.sendall(json.dumps(message).encode('utf-8'))
+                info = process_name + ',' + str(process_id) + '~'
+                message += info
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
+        message += '\r\n'
+        self.sock.sendall(message.encode('utf-8'))
 
     def kill_proc_tree(self, pid, sig=signal.SIGTERM, include_parent=True,
                        timeout=None, on_terminate=None):

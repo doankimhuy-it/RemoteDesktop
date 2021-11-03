@@ -20,7 +20,7 @@ class GetMACAddressDialog(QtWidgets.QDialog):
         self.get_button.move(60, 60)
 
         self.get_button.clicked.connect(self.click_get_button)
-        
+
     def click_get_button(self):
         message_to_send = {'type': 'mac_address', 'request': 'get', 'data': ''}
         message_to_send = json.dumps(message_to_send)
@@ -29,6 +29,7 @@ class GetMACAddressDialog(QtWidgets.QDialog):
         message_recvd = self.sock.recv(1024).decode('utf8')
         message_recvd = json.loads(message_recvd)
         self.mac_addr.setText(message_recvd['data'])
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])

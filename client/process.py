@@ -114,12 +114,12 @@ class ProcessDialog(QtWidgets.QDialog):
     def receive_list(self):
         message_recvd = ''
         data = self.sock.recv(1024).decode('utf-8')
-        while data:
-            #logging.debug('data is {}'.format(data))
+        while data and data[-2:] != '\r\n':
             message_recvd = message_recvd + str(data)
             data = self.sock.recv(1024).decode('utf-8')
-        message_recvd = json.loads(message_recvd)
-        list_recvd = message_recvd['data'].split('~')
+        message_recvd = message_recvd[:-2]
+        list_recvd = message_recvd.split('~')
+        list_recvd = list_recvd[:-1]
         process_list = []
         for item in list_recvd:
             name, pid = item.split(',')
@@ -131,7 +131,7 @@ class ProcessDialog(QtWidgets.QDialog):
         self.list_process_data = []
         self.list_process_data_backup = []
         message = {'type': 'process', 'request': 'get_list', 'data': ''}
-        self.sock.sendall(message.encode('utf-8'))
+        self.sock.sendall(json.dumps(message).encode('utf-8'))
         self.list_process_data = self.receive_list()
 
     def set_data(self):
@@ -155,15 +155,17 @@ class ProcessDialog(QtWidgets.QDialog):
             cell = index[0]
             row = cell.row()
             x = self.main_widget.model().index(row, 1).data()
-            message = {'request': 'kill_process', 'data': str(x)}
-            self.sock.sendall(message.encode('utf-8'))
+            message = {'type': 'process',
+                       'request': 'kill_process', 'data': str(x)}
+            self.sock.sendall(json.dumps(message).encode('utf-8'))
 
     def click_start_process(self):
         process, ok = QtWidgets.QInputDialog.getText(
             self, 'Start', 'Enter process/application name:')
         if ok:
-            message = {'request': 'start_process', 'data': str(process)}
-            self.sock.sendall(message.encode('utf-8'))
+            message = {'type': 'process',
+                       'request': 'start_process', 'data': str(process)}
+            self.sock.sendall(json.dumps(message).encode('utf-8'))
 
     def click_clear_process(self):
         self.main_widget.model().deleteLater()
@@ -199,4 +201,4 @@ if __name__ == '__main__':
     window = ProcessDialog(0)
     # print(window.list_process_data)
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

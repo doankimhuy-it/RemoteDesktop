@@ -53,7 +53,7 @@ class ControlDiag(QtWidgets.QDialog):
         process_button.setFixedSize(120, 40)
 
         key_control_button.clicked.connect(self.click_key_control_button)
-        #live_screen_button.clicked.connect(self.click_live_screen_button)
+        # live_screen_button.clicked.connect(self.click_live_screen_button)
         shutdown_logoff_button.clicked.connect(self.click_power_button)
         mac_addr_button.clicked.connect(self.click_mac_addr_button)
         file_explorer_button.clicked.connect(self.click_file_explorer_button)
@@ -62,7 +62,7 @@ class ControlDiag(QtWidgets.QDialog):
 
     def click_key_control_button(self):
         key_control_diag = KeyControlDialog(self.sock)
-        target=key_control_diag.exec()
+        target = key_control_diag.exec()
 
     # def click_live_screen_button(self):
     #     live_screen_diag = LiveScreenDiag(self.sock)
@@ -71,7 +71,7 @@ class ControlDiag(QtWidgets.QDialog):
 
     def click_power_button(self):
         power_diag = PowerDialog(self.sock)
-        target=power_diag.exec()
+        target = power_diag.exec()
 
     def click_mac_addr_button(self):
         mac_addr_diag = GetMACAddressDialog(self.sock)
@@ -88,6 +88,7 @@ class ControlDiag(QtWidgets.QDialog):
     def click_process_button(self):
         process_diag = ProcessDialog(self.sock)
         process_diag.exec()
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])

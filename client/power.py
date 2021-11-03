@@ -30,7 +30,7 @@ class PowerDialog(QtWidgets.QDialog):
     def click_logoff_button(self):
         message_to_send = {'request': 'logoff'}
         self.sock.sendall(json.dumps(message_to_send).encode('utf-8'))
-    
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
