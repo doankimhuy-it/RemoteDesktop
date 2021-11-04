@@ -2,9 +2,8 @@ import keyboard as kb
 from pynput import keyboard
 
 class KeyControl:
-    def __init__(self, sock, request):
+    def __init__(self, sock):
         self.sock = sock
-        self.request = request
         self.key_list = []
 
     def on_press(self, key):
@@ -33,21 +32,20 @@ class KeyControl:
         for i in range(150):
             kb.unblock_key(i)
 
-    def do_task(self):
+    def do_task(self, request):
         listener = keyboard.Listener(
             on_press=self.on_press,
             on_release=self.on_release)
 
-        if self.request == 'hook_key':
+        if request == 'hook_key':
             listener.start()
 
-        elif self.request == 'unhook_key':
+        elif request == 'unhook_key':
             stop = keyboard.Controller()
             stop.release(keyboard.Key.esc)
-
             self.sock.sendall('\r\n'.encode('utf-8'))
 
-        elif (self.request == 'lock_key'):
+        elif (request == 'lock_key'):
             self.lock_key()
-        elif (self.request == 'unlock_key'):
+        elif (request == 'unlock_key'):
             self.unlock_key()

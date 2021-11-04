@@ -106,6 +106,7 @@ class ServerConnection:
         process_exec = Process(sock)
         app_exec = Application(sock)
         mac_exec = GetMACAddress(sock)
+        key_control_exec = KeyControl(sock)
         power_exec = Power()
         file_manager_exec = FileManager(sock, request, data) # Not yet fully implemented
 
@@ -119,7 +120,7 @@ class ServerConnection:
         elif type == 'process':
             process_exec.do_task(request, data)
         elif type == 'key_control':
-            KeyControl(sock, request).do_task()
+            key_control_exec.do_task(request)
         elif type == 'mac_address':
             mac_exec.do_task()
         elif type == 'power':

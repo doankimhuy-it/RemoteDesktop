@@ -19,9 +19,8 @@ class Client:
             port = self.window.port_textbox.text()
             pos = 0
             if self.window.port_validator.validate(port, pos)[0] != self.window.port_validator.Acceptable:
-                err_diag = self.window.show_error(
+                self.window.show_error(
                     'Invalid Address', 'Invalid Port')
-                err_diag.exec()
                 return -1
             port = int(port)
             # try to connect to server for the first time, after disconnecting or timing out
@@ -29,7 +28,8 @@ class Client:
             self.client_connection.connection_status = STATUS_CONNECTING
             self.window.change_gui_status(STATUS_CONNECTING)
             # try to connect to host
-            self.client_connection.start_connection(host, port)
+            connection_thread = threading.Thread(target=self.client_connection.start_connection, args=(host, port))
+            connection_thread.start()
 
             # start timer - update GUI and send sample data to server (PING)
             self.window.update_gui_timer.start(500)
