@@ -9,6 +9,8 @@ from key_control import KeyControl
 from process import Process
 from power import Power
 from file_manager import FileManager
+from live_screen import LiveScreen
+from registry import RegistryEdit
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -67,6 +69,16 @@ class ServerConnection:
         conn, addr = sock.accept()  # accpet connection from client
         conn.setblocking(False)         # set sock not block
         data = addr
+
+        self.live_screen_exec = LiveScreen(conn)
+        self.process_exec = Process(conn)
+        self.app_exec = Application(conn)
+        self.mac_exec = GetMACAddress(conn)
+        self.key_control_exec = KeyControl(conn)
+        self.power_exec = Power()
+        self.file_manager_exec = FileManager(conn, '', '')  # Not yet fully implemented
+        self.reg_edit_exec = RegistryEdit(conn)
+
         event = selectors.EVENT_READ | selectors.EVENT_WRITE
         # register this connect to sel, with wait-event are both read & write
         self.sel.register(conn, events=event, data=data)
@@ -83,7 +95,7 @@ class ServerConnection:
         addr = key.data
         if mask & selectors.EVENT_READ:
             try:
-                recv_data = sock.recv(1024)  # read data
+                recv_data = sock.recv(4096)  # read data
             except ConnectionResetError:
                 logging.debug('Lost connection from {}'.format(addr))
                 self.stop_connect(sock)
@@ -106,30 +118,27 @@ class ServerConnection:
         # send command to correct function
         # do the task and answer the client
 
-        process_exec = Process(sock)
-        app_exec = Application(sock)
-        mac_exec = GetMACAddress(sock)
-        key_control_exec = KeyControl(sock)
-        power_exec = Power()
-        file_manager_exec = FileManager(sock, request, data) # Not yet fully implemented
-
         if type == 'connection':
             if request == 'ping':
                 pass
             elif request == 'close_connection':
                 self.stop_connect(sock)
         elif type == 'application':
-            app_exec.do_task(request, data)
+            self.app_exec.do_task(request, data)
         elif type == 'process':
-            process_exec.do_task(request, data)
+            self.process_exec.do_task(request, data)
         elif type == 'key_control':
-            key_control_exec.do_task(request)
+            self.key_control_exec.do_task(request)
         elif type == 'mac_address':
-            mac_exec.do_task()
+            self.mac_exec.do_task()
         elif type == 'power':
-            power_exec.do_task(request)
+            self.power_exec.do_task(request)
         elif type == 'file_explorer':
-            file_manager_exec.do_task()
+            self.file_manager_exec.do_task()
+        elif type == 'live_screen':
+            self.live_screen_exec.do_task(request, data)
+        elif type == 'reg_edit':
+            self.reg_edit_exec.do_task(request, data)
 
 
 if __name__ == '__main__':

@@ -50,7 +50,7 @@ class KeyControlDialog(QtWidgets.QDialog):
                            'request': 'hook_key', 'data': ''}
         self.sock.sendall(json.dumps(message_to_send).encode(('utf-8')))
 
-        #self.receive_data()
+        # self.receive_data()
         list_key_thread = threading.Thread(target=self.receive_data)
         list_key_thread.start()
 
@@ -61,10 +61,10 @@ class KeyControlDialog(QtWidgets.QDialog):
 
     def receive_data(self):
         key_str = ''
-        message_recvd = self.sock.recv(1024).decode('utf-8')
+        message_recvd = self.sock.recv(4096).decode('utf-8')
         while message_recvd and message_recvd[-2:] != '\r\n':
             key_str += message_recvd
-            message_recvd = self.sock.recv(1024).decode('utf-8')
+            message_recvd = self.sock.recv(4096).decode('utf-8')
             print(key_str)
             self.result_box.setText(str(key_str))
 

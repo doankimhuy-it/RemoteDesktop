@@ -26,7 +26,7 @@ class FileManager:
         print(myDir)
         message = {'type': '', 'request': '', 'data': myDir}
         self.sock.sendall(json.dumps(message).encode('utf-8'))
-        
+
     def get_file_directory(self):
         if (os.path.isdir(self.filename)):
             print(self.filename)
@@ -39,13 +39,12 @@ class FileManager:
                 self.sock.sendall(json.dumps(message).encode('utf-8'))
                 break
 
-
     def copy_file(self):
         file = open(self.filename, 'wb')
-        data = self.sock.recv(1024)
+        data = self.sock.recv(4096)
         while data:
             file.write(data)
-            data = self.sock.recv(1024)
+            data = self.sock.recv(4096)
 
     def delete_file(self):
         if os.path.exists(self.filename):

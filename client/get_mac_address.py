@@ -26,7 +26,7 @@ class GetMACAddressDialog(QtWidgets.QDialog):
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        message_recvd = self.sock.recv(1024).decode('utf8')
+        message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
         self.mac_addr.setText(message_recvd['data'])
 

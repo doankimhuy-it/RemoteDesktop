@@ -4,7 +4,7 @@ import sys
 import json
 
 class StandardItem(QtGui.QStandardItem):
-    def __init__(self, txt = '', font_size = 12, set_bold = False):
+    def __init__(self, txt='', font_size=12, set_bold=False):
         super().__init__()
 
         self.setEditable(False)
@@ -59,26 +59,25 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.getView.clicked.connect(self.click_get_button)
         self.copyButton.clicked.connect(self.click_copy_button)
         self.deleteButton.clicked.connect(self.click_delete_button)
-        
+
     def click_get_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'get', 'data': ''}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        message_recvd = self.sock.recv(1024).decode('utf8')
+        message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
         list_recvd = message_recvd['data'].split(',')
         for data in list_recvd:
             rootName = StandardItem(data)
             self.rootNode.appendRow(rootName)
-            
 
     def click_copy_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': ''}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        message_recvd = self.sock.recv(1024).decode('utf8')
+        message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
 
     def click_delete_button(self):
@@ -86,7 +85,7 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        message_recvd = self.sock.recv(1024).decode('utf8')
+        message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
 
     # def keyPressEvent(self, event):
@@ -105,7 +104,7 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        message_recvd = self.sock.recv(1024).decode('utf8')
+        message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
         list_recvd = message_recvd['data'].split(',')
         print(list_recvd)

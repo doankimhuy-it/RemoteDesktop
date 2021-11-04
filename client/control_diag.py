@@ -1,14 +1,14 @@
-import json
 import sys
 from PySide6 import QtWidgets
 import threading
 from application import ApplicationDialog
+from live_screen import LiveScreenDialog
 from process import ProcessDialog
 from get_mac_address import GetMACAddressDialog
 from key_control import KeyControlDialog
 from power import PowerDialog
 from file_explorer import FileExplorerDialog
-from file_explorer import *
+from registry import RegistryDialog
 
 class ControlDiag(QtWidgets.QDialog):
     def __init__(self, sock):
@@ -21,11 +21,16 @@ class ControlDiag(QtWidgets.QDialog):
 
         key_control_button = QtWidgets.QPushButton(
             'Control Keyboard', self)
-        key_control_button.move(90, 10)
+        key_control_button.move(10, 10)
         key_control_button.setFixedSize(120, 40)
 
+        reg_edit_button = QtWidgets.QPushButton(
+            'Edit Registry', self)
+        reg_edit_button.move(160, 10)
+        reg_edit_button.setFixedSize(120, 40)
+
         live_screen_button = QtWidgets.QPushButton(
-            'Stream Screen', self)
+            'Live Screen', self)
         live_screen_button.move(10, 60)
         live_screen_button.setFixedSize(120, 40)
 
@@ -54,7 +59,8 @@ class ControlDiag(QtWidgets.QDialog):
         process_button.setFixedSize(120, 40)
 
         key_control_button.clicked.connect(self.click_key_control_button)
-        # live_screen_button.clicked.connect(self.click_live_screen_button)
+        reg_edit_button.clicked.connect(self.click_reg_button)
+        live_screen_button.clicked.connect(self.click_live_screen_button)
         shutdown_logoff_button.clicked.connect(self.click_power_button)
         mac_addr_button.clicked.connect(self.click_mac_addr_button)
         file_explorer_button.clicked.connect(self.click_file_explorer_button)
@@ -63,16 +69,19 @@ class ControlDiag(QtWidgets.QDialog):
 
     def click_key_control_button(self):
         key_control_diag = KeyControlDialog(self.sock)
-        target = key_control_diag.exec()
+        key_control_diag.exec()
 
-    # def click_live_screen_button(self):
-    #     live_screen_diag = LiveScreenDiag(self.sock)
-    #     thread = threading.Thread(target=live_screen_diag.exec(), args=())
-    #     thread.start()
+    def click_reg_button(self):
+        reg_edit_diag = RegistryDialog(self.sock)
+        reg_edit_diag.exec()
+
+    def click_live_screen_button(self):
+        live_screen_diag = LiveScreenDialog(self.sock)
+        live_screen_diag.exec()
 
     def click_power_button(self):
         power_diag = PowerDialog(self.sock)
-        target = power_diag.exec()
+        power_diag.exec()
 
     def click_mac_addr_button(self):
         mac_addr_diag = GetMACAddressDialog(self.sock)

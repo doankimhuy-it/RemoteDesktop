@@ -113,10 +113,10 @@ class ProcessDialog(QtWidgets.QDialog):
 
     def receive_list(self):
         message_recvd = ''
-        data = self.sock.recv(1024).decode('utf-8')
+        data = self.sock.recv(4096).decode('utf-8')
         while data and data[-2:] != '\r\n':
             message_recvd = message_recvd + str(data)
-            data = self.sock.recv(1024).decode('utf-8')
+            data = self.sock.recv(4096).decode('utf-8')
         message_recvd = message_recvd[:-2]
         list_recvd = message_recvd.split('~')
         list_recvd = list_recvd[:-1]
