@@ -103,23 +103,29 @@ class ServerConnection:
         # send command to correct function
         # do the task and answer the client
 
+        process_exec = Process(sock)
+        app_exec = Application(sock)
+        mac_exec = GetMACAddress(sock)
+        power_exec = Power()
+        file_manager_exec = FileManager(sock, request, data) # Not yet fully implemented
+
         if type == 'connection':
             if request == 'ping':
                 pass
             elif request == 'close_connection':
                 self.stop_connect(sock)
         elif type == 'application':
-            Application(sock, request, data).do_task()
+            app_exec.do_task(request, data)
         elif type == 'process':
-            Process(sock, request, data).do_task()
+            process_exec.do_task(request, data)
         elif type == 'key_control':
             KeyControl(sock, request).do_task()
         elif type == 'mac_address':
-            GetMACAddress(sock, request, data).do_task()
+            mac_exec.do_task()
         elif type == 'power':
-            Power(request).do_task()
+            power_exec.do_task(request)
         elif type == 'file_explorer':
-            FileManager(sock, request, data).do_task()
+            file_manager_exec.do_task()
 
 
 if __name__ == '__main__':

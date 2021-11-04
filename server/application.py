@@ -12,8 +12,8 @@ IsWindowVisible = ctypes.windll.user32.IsWindowVisible
 GetWindowThreadProcessId = ctypes.windll.user32.GetWindowThreadProcessId
 
 class Application(Process):
-    def __init__(self, sock, request, data):
-        super().__init__(sock, request, data)
+    def __init__(self, sock):
+        super().__init__(sock)
         self.list_app_data = []
 
     def foreach_window(self, hwnd, lParam):

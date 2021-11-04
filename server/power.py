@@ -3,11 +3,11 @@ import subprocess
 
 class Power:
     '''
-    Class which design and handle message for shutdown
+    Handle shutdown and logoff requests
         '''
 
-    def __init__(self, operation):
-        self._operation = operation
+    def __init__(self):
+        pass
 
     def shutdown(self):
         subprocess.Popen(['shutdown.exe', '-s'])
@@ -17,8 +17,8 @@ class Power:
         subprocess.Popen(['shutdown.exe', '-l'])
         logging.debug('Logoff remote successfully')
 
-    def do_task(self):
-        if (self._operation == 'shutdown'):
+    def do_task(self, operation):
+        if (operation == 'shutdown'):
             self.shutdown()
-        elif (self._operation == 'logoff'):
+        elif (operation == 'logoff'):
             self.logoff()

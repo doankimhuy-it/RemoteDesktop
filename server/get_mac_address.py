@@ -4,7 +4,7 @@ import re
 import logging
 
 class GetMACAddress:
-    def __init__(self, sock, request, data):
+    def __init__(self, sock):
         self.sock = sock
 
     def do_task(self):

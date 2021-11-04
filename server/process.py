@@ -1,4 +1,3 @@
-import json
 import signal
 import psutil
 import ctypes
@@ -12,18 +11,16 @@ IsWindowVisible = ctypes.windll.user32.IsWindowVisible
 GetWindowThreadProcessId = ctypes.windll.user32.GetWindowThreadProcessId
 
 class Process:
-    def __init__(self, sock, request, data):
+    def __init__(self, sock):
         self.sock = sock
-        self.request = request
-        self.data = data
 
-    def do_task(self):
-        if self.request == 'get_list':
+    def do_task(self, request, data):
+        if request == 'get_list':
             self.send_process_list()
-        if self.request == 'kill_process':
-            self.kill_proc_tree(pid=int(self.data))
-        if self.request == 'start_process':
-            self.start_process(self.data)
+        if request == 'kill_process':
+            self.kill_proc_tree(pid=int(data))
+        if request == 'start_process':
+            self.start_process(data)
 
     def send_process_list(self):
         message = ''

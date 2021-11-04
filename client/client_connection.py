@@ -35,8 +35,6 @@ class ClientConnection:
             logging.debug('Connected to server {}'.format(
                 self.client_socket.getpeername()))
             self.connection_status = STATUS_CONNECTED
-            # control_thread = threading.Thread(target=self.show_control_diag, args=(True,))
-            # control_thread.start()
             self.control_dialog = ControlDiag(self.client_socket)
             self.show_control_diag(is_visible=True)
 
