@@ -117,7 +117,7 @@ class ProcessDialog(QtWidgets.QDialog):
         while data and data[-2:] != '\r\n':
             message_recvd = message_recvd + str(data)
             data = self.sock.recv(4096).decode('utf-8')
-        message_recvd = message_recvd[:-2]
+        message_recvd += str(data[:-2])
         list_recvd = message_recvd.split('~')
         list_recvd = list_recvd[:-1]
         process_list = []
