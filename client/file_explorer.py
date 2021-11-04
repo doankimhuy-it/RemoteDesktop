@@ -10,7 +10,7 @@ class StandardItem(QtGui.QStandardItem):
         self.setEditable(False)
         self.setText(txt)
 
-class FileExplorerDialog(QtWidgets.QDialog):
+class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
     def __init__(self, sock):
         super().__init__()
 
@@ -27,7 +27,14 @@ class FileExplorerDialog(QtWidgets.QDialog):
 
         self.treeView.setModel(self.treeModel)
         self.treeView.expandAll()
-        # self.treeView.SelectedClicked(self.click_get_child_dir())
+        self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.treeView.clicked.connect(self.click_get_child_dir)
+
+        # self.model = QtWidgets.QFileSystemModel()
+        # self.model.setRootPath((QtCore.QDir.rootPath()))
+        # self.treeView.setModel(self.model)
+        # self.treeView.setSortingEnabled(True)
+        # self.rootNode = self.model.invisibleRootItem()
 
         self.getView = QtWidgets.QPushButton(self)
         self.getView.move(350, 20)
@@ -64,6 +71,7 @@ class FileExplorerDialog(QtWidgets.QDialog):
         for data in list_recvd:
             rootName = StandardItem(data)
             self.rootNode.appendRow(rootName)
+            
 
     def click_copy_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': ''}
@@ -81,12 +89,34 @@ class FileExplorerDialog(QtWidgets.QDialog):
         message_recvd = self.sock.recv(1024).decode('utf8')
         message_recvd = json.loads(message_recvd)
 
-    def click_get_child_dir(self):
-        return 1
+    # def keyPressEvent(self, event):
+
+    #     if event.key() == QtWidgets.Key_Space or event.key() == QtWidgets.Key_Return:
+    #         index = self.selectedIndexes()[0].model()
+    #         crawler = index.model().itemFromIndex(index)
+    #     QtWidgets.QTreeView.keyPressEvent(self, event)
+    #     return index
+
+    @QtCore.Slot(QtCore.QModelIndex)
+    def click_get_child_dir(self, val):
+        # indexItem = self.treeView.model.index(index.row(), 0, index.parent())
+        # path = self.treeView.model.fileName(indexItem)
+        message_to_send = {'type': 'file_explorer', 'request': 'get_child_dir', 'data': '{}'.format(val.data())}
+        message_to_send = json.dumps(message_to_send)
+        self.sock.sendall(message_to_send.encode('utf-8'))
+
+        message_recvd = self.sock.recv(1024).decode('utf8')
+        message_recvd = json.loads(message_recvd)
+        list_recvd = message_recvd['data'].split(',')
+        print(list_recvd)
+        for data in list_recvd:
+            rootName = StandardItem(data)
+            index = self.treeView.selectedIndexes()[0]
+            index.model().itemFromIndex(index).appendRow(rootName)
 
 
-# if __name__ == '__main__':
-#     app = QtWidgets.QApplication([])
-#     window = FileExplorerDialog(0)
-#     window.show()
-#     sys.exit(app.exec())
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
+    window = FileExplorerDialog(0)
+    window.show()
+    sys.exit(app.exec())
