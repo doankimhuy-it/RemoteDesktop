@@ -1,4 +1,5 @@
 import json
+import logging
 from subprocess import *
 import os
 import string
@@ -26,11 +27,17 @@ class FileManager:
         message = {'type': '', 'request': '', 'data': myDir}
         self.sock.sendall(json.dumps(message).encode('utf-8'))
         
-    def get_file_directory(self, path):
-        if (os.path.isdir(path)):
-            (root, dirs, files) = os.walk(path)
-            dir = ','.join(root, dirs, files)
-            self.sock.sendall(json.dumps(dir).encode('utf-8'))
+    def get_file_directory(self):
+        if (os.path.isdir(self.filename)):
+            print(self.filename)
+            # (root, dirs, files) = os.walk(self.filename)
+            for (root, dirs, files) in os.walk(self.filename):
+                data = dirs + files
+                dir = ','.join(data)
+                message = {'type': '', 'request': '', 'data': dir}
+                logging.debug(message)
+                self.sock.sendall(json.dumps(message).encode('utf-8'))
+                break
 
 
     def copy_file(self):
