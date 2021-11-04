@@ -50,7 +50,9 @@ class FileManager:
         if os.path.exists(self.filename):
             os.remove(self.filename)
 
-    def do_task(self):
+    def do_task(self, request, data):
+        self.request = request
+        self.filename = data
         if self.request == 'copy':
             self.copy_file()
         elif self.request == 'delete':
