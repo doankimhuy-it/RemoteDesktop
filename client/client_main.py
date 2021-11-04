@@ -28,8 +28,7 @@ class Client:
             self.client_connection.connection_status = STATUS_CONNECTING
             self.window.change_gui_status(STATUS_CONNECTING)
             # try to connect to host
-            connection_thread = threading.Thread(target=self.client_connection.start_connection, args=(host, port))
-            connection_thread.start()
+            self.client_connection.start_connection(host, port)
 
             # start timer - update GUI and send sample data to server (PING)
             self.window.update_gui_timer.start(500)

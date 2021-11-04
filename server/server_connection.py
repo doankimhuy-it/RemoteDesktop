@@ -96,6 +96,9 @@ class ServerConnection:
                     logging.debug('Closed connection to {}'.format(addr))
                     self.stop_connect(sock)
 
+        elif mask & selectors.EVENT_WRITE:
+            pass
+
     def handle_message(self, sock, message):
         type = message['type']
         request = message['request']
