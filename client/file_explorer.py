@@ -15,7 +15,7 @@ class FileExplorerDialog(QtWidgets.QDialog):
         super().__init__()
 
         self.sock = sock
-        self.setWindowTitle("File explorer")
+        self.setWindowTitle("File Explorer")
         self.resize(500, 400)
 
         self.treeView = QtWidgets.QTreeView(self)

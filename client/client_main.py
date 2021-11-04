@@ -73,7 +73,7 @@ class Client:
     def start(self):
         self.window.show()
         self.connect_gui_features()
-        self.app.exec()
+        sys.exit(self.app.exec())
 
 
 if __name__ == '__main__':

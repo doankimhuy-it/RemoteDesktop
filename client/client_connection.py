@@ -19,6 +19,7 @@ class ClientConnection:
         self.port = 0
         self.client_socket = None
         self.lost_connection = False
+        self.control_dialog = None
 
     def start_connection(self, host, port):
         self.host = host
@@ -34,7 +35,10 @@ class ClientConnection:
             logging.debug('Connected to server {}'.format(
                 self.client_socket.getpeername()))
             self.connection_status = STATUS_CONNECTED
-            self.show_control_diag(True)
+            # control_thread = threading.Thread(target=self.show_control_diag, args=(True,))
+            # control_thread.start()
+            self.control_dialog = ControlDiag(self.client_socket)
+            self.show_control_diag(is_visible=True)
 
     def send_message(self, message):
         message = json.dumps(message).encode('utf-8')
@@ -53,14 +57,13 @@ class ClientConnection:
                        'request': 'close_connection', 'data': ''}
         self.send_message(end_message)
         self.connection_status = STATUS_DISCONNECTED
-        self.show_control_diag(False)
+        self.show_control_diag(is_visible=False)
 
     def show_control_diag(self, is_visible):
-        control_dialog = ControlDiag(self.client_socket)
         if is_visible:
-            control_dialog.exec()
+            self.control_dialog.show()
         else:
-            control_dialog.hide()
+            self.control_dialog.hide()
 
 
 if __name__ == '__main__':
