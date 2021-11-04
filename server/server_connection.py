@@ -134,7 +134,7 @@ class ServerConnection:
         elif type == 'power':
             self.power_exec.do_task(request)
         elif type == 'file_explorer':
-            self.file_manager_exec.do_task()
+            self.file_manager_exec.do_task(request, data)
         elif type == 'live_screen':
             self.live_screen_exec.do_task(request, data)
         elif type == 'reg_edit':
