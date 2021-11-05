@@ -67,7 +67,7 @@ class ServerConnection:
 
     def start_connect(self, sock):
         conn, addr = sock.accept()  # accpet connection from client
-        conn.setblocking(False)         # set sock not block
+        #conn.setblocking(False)         # set sock not block
         data = addr
 
         self.live_screen_exec = LiveScreen(conn)
