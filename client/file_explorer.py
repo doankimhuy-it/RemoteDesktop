@@ -178,7 +178,12 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.sock.sendall(message_to_send.encode('utf-8'))
 
         data = ''
-        message_recvd = self.sock.recv(4096).decode('utf8')
+        logging.debug('received')
+        message_recvd = self.sock.recv(1024).decode('utf8') #test change recv from 4096 to 1024
+        logging.debug(message_recvd)
+        if message_recvd == ' ':
+            logging.debug('return because it is not a directory')
+            return
         while message_recvd and message_recvd[-2:] != '\r\n':
             data += message_recvd
             message_recvd = self.sock.recv(4096).decode('utf8')
