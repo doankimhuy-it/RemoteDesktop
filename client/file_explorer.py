@@ -36,13 +36,8 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.treeView.customContextMenuRequested.connect(self.openContextMenu)
 
         self.myMenu = QtWidgets.QMenu('Menu', self)
-        copy_btn = QtGui.QAction('Copy',self)
-        copy_btn.triggered.connect(self.click_copy_button)
-        copy_btn.setCheckable(True)
-        self.myMenu.addAction(copy_btn)
         delete_btn = QtGui.QAction('Delete',self)
-        delete_btn.triggered.connect(self.click_delete_button)
-        delete_btn.setCheckable(True)
+        delete_btn.triggered.connect(self.right_click_delete_button)
         self.myMenu.addAction(delete_btn)
         #end test right click
         self.treeView.clicked.connect(self.click_get_child_dir)
@@ -148,6 +143,23 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
             data += message_recvd
             message_recvd = self.sock.recv(4096).decode('utf8')
         data += message_recvd[:-2]
+
+    #test right click delete
+    def right_click_delete_button(self):
+        index_path = self.treeView.selectedIndexes()[0]
+        path = index_path.model().itemFromIndex(index_path).path
+        message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': path}
+        logging.debug(message_to_send)
+        message_to_send = json.dumps(message_to_send)
+        self.sock.sendall(message_to_send.encode('utf-8'))
+
+        data = ''
+        message_recvd = self.sock.recv(4096).decode('utf8')
+        while message_recvd and message_recvd[-2:] != '\r\n':
+            data += message_recvd
+            message_recvd = self.sock.recv(4096).decode('utf8')
+        data += message_recvd[:-2]
+    #end test right click delete
 
     # def keyPressEvent(self, event):
 
