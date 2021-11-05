@@ -28,6 +28,20 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.treeView.setModel(self.treeModel)
         self.treeView.expandAll()
         self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        #begin test right click
+        self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.treeView.customContextMenuRequested.connect(self.openContextMenu)
+
+        self.myMenu = QtWidgets.QMenu('Menu', self)
+        copy_btn = QtGui.QAction('Copy',self)
+        copy_btn.triggered.connect(self.click_copy_button)
+        copy_btn.setCheckable(True)
+        self.myMenu.addAction(copy_btn)
+        delete_btn = QtGui.QAction('Delete',self)
+        delete_btn.triggered.connect(self.click_delete_button)
+        delete_btn.setCheckable(True)
+        self.myMenu.addAction(delete_btn)
+        #end test right click
         self.treeView.clicked.connect(self.click_get_child_dir)
 
         # self.model = QtWidgets.QFileSystemModel()
@@ -59,6 +73,11 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.getView.clicked.connect(self.click_get_button)
         self.copyButton.clicked.connect(self.click_copy_button)
         self.deleteButton.clicked.connect(self.click_delete_button)
+
+    #function test right click
+    def openContextMenu(self):
+        self.myMenu.exec_(QtGui.QCursor.pos())
+    #end test
 
     def click_get_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'get', 'data': ''}
@@ -100,6 +119,9 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
     def click_get_child_dir(self, val):
         # indexItem = self.treeView.model.index(index.row(), 0, index.parent())
         # path = self.treeView.model.fileName(indexItem)
+        print('---------')
+        print(val.data())
+        print('----------')
         message_to_send = {'type': 'file_explorer', 'request': 'get_child_dir', 'data': '{}'.format(val.data())}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
@@ -109,7 +131,8 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         list_recvd = message_recvd['data'].split(',')
         print(list_recvd)
         for data in list_recvd:
-            rootName = StandardItem(data)
+            #test if i can change the name
+            rootName = StandardItem(val.data() + data)
             index = self.treeView.selectedIndexes()[0]
             index.model().itemFromIndex(index).appendRow(rootName)
 
