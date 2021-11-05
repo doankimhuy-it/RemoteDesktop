@@ -22,7 +22,7 @@ class FileManager:
                     print(root)
                     dir.append(root)
                     break
-        myDir = ",".join(dir)
+        myDir = "|".join(dir)
         print(myDir)
         message = {'type': '', 'request': '', 'data': myDir}
         self.sock.sendall(json.dumps(message).encode('utf-8'))
@@ -33,7 +33,7 @@ class FileManager:
             # (root, dirs, files) = os.walk(self.filename)
             for (root, dirs, files) in os.walk(self.filename):
                 data = dirs + files
-                dir = ','.join(data)
+                dir = '|'.join(data)
                 message = {'type': '', 'request': '', 'data': dir}
                 logging.debug(message)
                 self.sock.sendall(json.dumps(message).encode('utf-8'))
