@@ -38,7 +38,10 @@ class FileManager:
                 self.sock.sendall('\r\n'.encode('utf-8'))
                 break
         elif os.path.isfile(name):
-            return
+            message = ' '
+            logging.debug('helo world')
+            self.sock.sendall(message.encode('utf-8'))
+            logging.debug('sent')
 
     def copy_file(self, path):
         file = open(path, 'wb')
