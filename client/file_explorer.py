@@ -1,8 +1,9 @@
-import socket
+import time
 from PySide6 import QtWidgets, QtGui, QtCore
 import sys
 import json
 import logging
+import ntpath
 
 class StandardItem(QtGui.QStandardItem):
     def __init__(self, txt='', font_size=12, set_bold=False):
@@ -89,6 +90,9 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.deleteButton.clicked.connect(self.click_delete_button)
         self.clearButton.clicked.connect(self.click_clear_button)
 
+        self.index_path = 0
+        self.path = ''
+
     #function test right click
     def openContextMenu(self):
         self.myMenu.exec_(QtGui.QCursor.pos())
@@ -124,17 +128,21 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
             self.rootNode.appendRow(rootName)
 
     def click_copy_button(self):
-        message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': self.inputText.text()}
-        logging.debug(message_to_send)
+
+        file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'C:\\', 'All files (*.*)')
+        file_name = file[0]
+        name = ntpath.basename(file_name)
+
+        message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': '{}'.format(self.path + '\\' + name)}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        data = ''
-        message_recvd = self.sock.recv(4096).decode('utf8')
-        while message_recvd and message_recvd[-2:] != '\r\n':
-            data += message_recvd
-            message_recvd = self.sock.recv(4096).decode('utf8')
-        data += message_recvd[:-2]
+        fi = open(file_name, 'rb')
+        file_data = fi.read(4096)
+        while file_data:
+            self.sock.sendall(file_data)
+            file_data = fi.read(4096)
+        self.sock.sendall(b'\r\n')
 
     def click_delete_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': self.inputText.text()}
@@ -162,15 +170,15 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         # indexItem = self.treeView.model.index(index.row(), 0, index.parent())
         # path = self.treeView.model.fileName(indexItem)
         print('---------')
-        index_path = self.treeView.selectedIndexes()[0]
-        check_update = index_path.model().itemFromIndex(index_path).check_update
+        self.index_path = self.treeView.selectedIndexes()[0]
+        check_update = self.index_path.model().itemFromIndex(self.index_path).check_update
         if check_update == True:
             return
-        path = index_path.model().itemFromIndex(index_path).path
-        index_path.model().itemFromIndex(index_path).check_update = True
-        print(path)
+        self.path = self.index_path.model().itemFromIndex(self.index_path).path
+        self.index_path.model().itemFromIndex(self.index_path).check_update = True
+        print(self.path)
         print('----------')
-        message_to_send = {'type': 'file_explorer', 'request': 'get_child_dir', 'data': '{}'.format(path)}
+        message_to_send = {'type': 'file_explorer', 'request': 'get_child_dir', 'data': '{}'.format(self.path)}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
@@ -186,7 +194,7 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
             #test if i can change the name
             rootName = StandardItem(data)
             #test rootName.path
-            rootName.path = rootName.path + path + '\\' + data
+            rootName.path = rootName.path + self.path + '\\' + data
             print(rootName.path + '|||||||||||')
             index = self.treeView.selectedIndexes()[0]
             #test get path

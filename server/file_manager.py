@@ -40,12 +40,14 @@ class FileManager:
         elif os.path.isfile(name):
             return
 
-    def copy_file(self, name):
-        file = open(name, 'wb')
+    def copy_file(self, path):
+        file = open(path, 'wb')
         data = self.sock.recv(4096)
-        while data:
+        while data and data[-2:] != b'\r\n':
             file.write(data)
             data = self.sock.recv(4096)
+        file.write(data[:-2])
+        file.close()
 
     def delete_file(self, name):
         if os.path.exists(name):
