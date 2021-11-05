@@ -76,7 +76,7 @@ class ServerConnection:
         self.mac_exec = GetMACAddress(conn)
         self.key_control_exec = KeyControl(conn)
         self.power_exec = Power()
-        self.file_manager_exec = FileManager(conn, '', '')  # Not yet fully implemented
+        self.file_manager_exec = FileManager(conn)  # Not yet fully implemented
         self.reg_edit_exec = RegistryEdit(conn)
 
         event = selectors.EVENT_READ | selectors.EVENT_WRITE

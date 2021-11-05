@@ -111,9 +111,13 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
+        data = ''
         message_recvd = self.sock.recv(4096).decode('utf8')
-        message_recvd = json.loads(message_recvd)
-        list_recvd = message_recvd['data'].split('|')
+        while message_recvd and message_recvd[-2:] != '\r\n':
+            data += message_recvd
+            message_recvd = self.sock.recv(4096).decode('utf8')
+        data += message_recvd[:-2]
+        list_recvd = data.split('|')
         for data in list_recvd:
             rootName = StandardItem(data)
             rootName.path += data
@@ -125,8 +129,12 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
+        data = ''
         message_recvd = self.sock.recv(4096).decode('utf8')
-        message_recvd = json.loads(message_recvd)
+        while message_recvd and message_recvd[-2:] != '\r\n':
+            data += message_recvd
+            message_recvd = self.sock.recv(4096).decode('utf8')
+        data += message_recvd[:-2]
 
     def click_delete_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': self.inputText.text()}
@@ -134,8 +142,12 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
+        data = ''
         message_recvd = self.sock.recv(4096).decode('utf8')
-        message_recvd = json.loads(message_recvd)
+        while message_recvd and message_recvd[-2:] != '\r\n':
+            data += message_recvd
+            message_recvd = self.sock.recv(4096).decode('utf8')
+        data += message_recvd[:-2]
 
     # def keyPressEvent(self, event):
 
@@ -162,9 +174,13 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
+        data = ''
         message_recvd = self.sock.recv(4096).decode('utf8')
-        message_recvd = json.loads(message_recvd)
-        list_recvd = message_recvd['data'].split('|')
+        while message_recvd and message_recvd[-2:] != '\r\n':
+            data += message_recvd
+            message_recvd = self.sock.recv(4096).decode('utf8')
+        data += message_recvd[:-2]
+        list_recvd = data.split('|')
         print(list_recvd)
         for data in list_recvd:
             #test if i can change the name

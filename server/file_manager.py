@@ -5,15 +5,13 @@ import os
 import string
 
 class FileManager:
-    def __init__(self, sock, request, filename):
+    def __init__(self, sock):
         self.sock = sock
-        self.request = request
-        self.filename = filename
 
     def get_base_file_directory(self):
         dir = []
-        for startpath in string.ascii_uppercase:
-            path = '{}:\\'.format(startpath)
+        for start_path in string.ascii_uppercase:
+            path = '{}:\\'.format(start_path)
             check = os.path.exists(path)
             if check:
                 # (root, dirs, files) = os.walk(path)
@@ -22,44 +20,43 @@ class FileManager:
                     print(root)
                     dir.append(root)
                     break
-        myDir = "|".join(dir)
-        print(myDir)
-        message = {'type': '', 'request': '', 'data': myDir}
-        self.sock.sendall(json.dumps(message).encode('utf-8'))
+        my_dir = "|".join(dir)
+        print(my_dir)
+        message = my_dir
+        self.sock.sendall(message.encode('utf-8'))
+        self.sock.sendall('\r\n'.encode('utf-8'))
 
-    def get_file_directory(self):
-        if (os.path.isdir(self.filename)):
-            print(self.filename)
-            # (root, dirs, files) = os.walk(self.filename)
-            for (root, dirs, files) in os.walk(self.filename):
+    def get_file_directory(self, name):
+        if (os.path.isdir(name)):
+            print(name)
+            for (root, dirs, files) in os.walk(name):
                 data = dirs + files
                 dir = '|'.join(data)
-                message = {'type': '', 'request': '', 'data': dir}
+                message = dir
                 logging.debug(message)
-                self.sock.sendall(json.dumps(message).encode('utf-8'))
+                self.sock.sendall(message.encode('utf-8'))
+                self.sock.sendall('\r\n'.encode('utf-8'))
                 break
-        elif os.path.isfile(self.filename):
+        elif os.path.isfile(name):
             return
 
-    def copy_file(self):
-        file = open(self.filename, 'wb')
+    def copy_file(self, name):
+        file = open(name, 'wb')
         data = self.sock.recv(4096)
         while data:
             file.write(data)
             data = self.sock.recv(4096)
 
-    def delete_file(self):
-        if os.path.exists(self.filename):
-            os.remove(self.filename)
+    def delete_file(self, name):
+        if os.path.exists(name):
+            os.remove(name)
 
     def do_task(self, request, data):
-        self.request = request
-        self.filename = data
-        if self.request == 'copy':
-            self.copy_file()
-        elif self.request == 'delete':
-            self.delete_file()
-        elif self.request == 'get':
+        if request == 'copy':
+            self.copy_file(data)
+        elif request == 'delete':
+            self.delete_file(data)
+        elif request == 'get':
             self.get_base_file_directory()
-        elif self.request == 'get_child_dir':
-            self.get_file_directory()
+        elif request == 'get_child_dir':
+            self.get_file_directory(data)
