@@ -6,6 +6,7 @@ import json
 class StandardItem(QtGui.QStandardItem):
     def __init__(self, txt='', font_size=12, set_bold=False):
         super().__init__()
+        self.path = ''
 
         self.setEditable(False)
         self.setText(txt)
@@ -86,9 +87,10 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
 
         message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
-        list_recvd = message_recvd['data'].split(',')
+        list_recvd = message_recvd['data'].split('|')
         for data in list_recvd:
             rootName = StandardItem(data)
+            rootName.path += data
             self.rootNode.appendRow(rootName)
 
     def click_copy_button(self, val):
@@ -120,20 +122,28 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         # indexItem = self.treeView.model.index(index.row(), 0, index.parent())
         # path = self.treeView.model.fileName(indexItem)
         print('---------')
-        print(val.data())
+        index_path = self.treeView.selectedIndexes()[0]
+        path = index_path.model().itemFromIndex(index_path).path
+        print(path)
         print('----------')
-        message_to_send = {'type': 'file_explorer', 'request': 'get_child_dir', 'data': '{}'.format(val.data())}
+        message_to_send = {'type': 'file_explorer', 'request': 'get_child_dir', 'data': '{}'.format(path)}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
         message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
-        list_recvd = message_recvd['data'].split(',')
+        list_recvd = message_recvd['data'].split('|')
         print(list_recvd)
         for data in list_recvd:
             #test if i can change the name
-            rootName = StandardItem(val.data() + data)
+            rootName = StandardItem(data)
+            #test rootName.path
+            rootName.path = rootName.path + path + '\\' + data
+            print(rootName.path + '|||||||||||')
             index = self.treeView.selectedIndexes()[0]
+            #test get path
+            # txt = index.model().itemFromIndex(index).path + '\\' + data
+            # print(txt)
             index.model().itemFromIndex(index).appendRow(rootName)
 
 
