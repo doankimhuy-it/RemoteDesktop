@@ -91,16 +91,16 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
             rootName = StandardItem(data)
             self.rootNode.appendRow(rootName)
 
-    def click_copy_button(self):
-        message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': ''}
+    def click_copy_button(self, val):
+        message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': val.data()}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
         message_recvd = self.sock.recv(4096).decode('utf8')
         message_recvd = json.loads(message_recvd)
 
-    def click_delete_button(self):
-        message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': ''}
+    def click_delete_button(self, val):
+        message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': val.data()}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
