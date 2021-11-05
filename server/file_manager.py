@@ -27,10 +27,7 @@ class FileManager:
         self.sock.sendall('\r\n'.encode('utf-8'))
 
     def get_file_directory(self, name):
-        logging.debug(name + '\\\\\\\\\\\\ ')
-        logging.debug(os.path.isdir(name))
-        logging.debug(os.path.isfile(name))
-        if os.path.isdir(name):
+        if (os.path.isdir(name)):
             print(name)
             for (root, dirs, files) in os.walk(name):
                 data = dirs + files
@@ -41,10 +38,7 @@ class FileManager:
                 self.sock.sendall('\r\n'.encode('utf-8'))
                 break
         elif os.path.isfile(name):
-            message = ' '
-            logging.debug('helo world')
-            self.sock.sendall(message.encode('utf-8'))
-            logging.debug('sent')
+            return
 
     def copy_file(self, path):
         file = open(path, 'wb')
