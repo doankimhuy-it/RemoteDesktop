@@ -38,6 +38,8 @@ class FileManager:
                 logging.debug(message)
                 self.sock.sendall(json.dumps(message).encode('utf-8'))
                 break
+        elif os.path.isfile(self.filename):
+            return
 
     def copy_file(self):
         file = open(self.filename, 'wb')
