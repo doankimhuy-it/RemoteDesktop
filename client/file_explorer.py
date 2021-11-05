@@ -37,13 +37,8 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.treeView.customContextMenuRequested.connect(self.openContextMenu)
 
         self.myMenu = QtWidgets.QMenu('Menu', self)
-        copy_btn = QtGui.QAction('Copy',self)
-        copy_btn.triggered.connect(self.click_copy_button)
-        copy_btn.setCheckable(True)
-        self.myMenu.addAction(copy_btn)
         delete_btn = QtGui.QAction('Delete',self)
-        delete_btn.triggered.connect(self.click_delete_button)
-        delete_btn.setCheckable(True)
+        delete_btn.triggered.connect(self.right_click_delete_button)
         self.myMenu.addAction(delete_btn)
         #end test right click
         self.treeView.clicked.connect(self.click_get_child_dir)
@@ -144,18 +139,26 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
             file_data = fi.read(4096)
         self.sock.sendall(b'\r\n')
 
+    def right_click_delete_button(self):
+        index_path = self.treeView.selectedIndexes()[0]
+        path = index_path.model().itemFromIndex(index_path).path
+        message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': path}
+        logging.debug(message_to_send)
+        message_to_send = json.dumps(message_to_send)
+        self.sock.sendall(message_to_send.encode('utf-8'))
+
     def click_delete_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': self.inputText.text()}
         logging.debug(message_to_send)
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        data = ''
-        message_recvd = self.sock.recv(4096).decode('utf8')
-        while message_recvd and message_recvd[-2:] != '\r\n':
-            data += message_recvd
-            message_recvd = self.sock.recv(4096).decode('utf8')
-        data += message_recvd[:-2]
+        # data = ''
+        # message_recvd = self.sock.recv(4096).decode('utf8')
+        # while message_recvd and message_recvd[-2:] != '\r\n':
+        #     data += message_recvd
+        #     message_recvd = self.sock.recv(4096).decode('utf8')
+        # data += message_recvd[:-2]
 
     # def keyPressEvent(self, event):
 
@@ -183,7 +186,12 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.sock.sendall(message_to_send.encode('utf-8'))
 
         data = ''
-        message_recvd = self.sock.recv(4096).decode('utf8')
+        logging.debug('received')
+        message_recvd = self.sock.recv(1024).decode('utf8') #test change recv from 4096 to 1024
+        logging.debug(message_recvd)
+        if message_recvd == ' ':
+            logging.debug('return because it is not a directory')
+            return
         while message_recvd and message_recvd[-2:] != '\r\n':
             data += message_recvd
             message_recvd = self.sock.recv(4096).decode('utf8')
