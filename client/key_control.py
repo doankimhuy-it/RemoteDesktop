@@ -101,8 +101,9 @@ class KeyControlDialog(QtWidgets.QDialog):
             logging.debug('start quit')
             self.get_thread.quit()
             logging.debug('start wait')
-            self.get_thread.wait()
+            #self.get_thread.wait()
             logging.debug('wait done')
+            self.get_thread = None
 
     class GettingThread(QThread):
         key_pressed = Signal(str)

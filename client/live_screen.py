@@ -25,7 +25,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
         self.render_thread = None
 
     def init_ui(self):
-        
+
         self.setWindowTitle('Live Screen')
         self.setFixedSize(720, 480)
         self.picture_box = QtWidgets.QLabel(self)
@@ -43,23 +43,20 @@ class LiveScreenDialog(QtWidgets.QDialog):
         self.start_button.clicked.connect(self.click_start_button)
         self.stop_button.clicked.connect(self.click_stop_button)
 
-        
-
     def set_image(self, image):
         self.count_frame += 1
         if self.count_frame == 10:
-            logging.debug('10!')
             self.start_time = time.time()
         self.picture_box.setPixmap(QPixmap.fromImage(image))
 
     def click_start_button(self):
         if not self.get_thread:
-            sock = socket.socket(
+            tcpsock = socket.socket(
                 family=socket.AF_INET, type=socket.SOCK_STREAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(('0.0.0.0', 0))
-            self.port = sock.getsockname()[1]
-            self.get_thread = self.GetScreenshotThread(self.img_queue, sock)
+            tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            tcpsock.bind(('0.0.0.0', 0))
+            self.port = tcpsock.getsockname()[1]
+            self.get_thread = self.GetScreenshotThread(self.img_queue, tcpsock)
 
         if not self.render_thread:
             self.render_thread = self.RenderThread(self.img_queue)
@@ -67,7 +64,8 @@ class LiveScreenDialog(QtWidgets.QDialog):
 
         message = {'type': 'live_screen', 'request': 'start', 'data': self.port}
         self.sock.sendall(json.dumps(message).encode('utf-8'))
-        
+        logging.debug('start send: {}'.format(message))
+
         self.get_thread.start()
         self.render_thread.start()
 
@@ -78,17 +76,18 @@ class LiveScreenDialog(QtWidgets.QDialog):
     def click_stop_button(self):
         message = {'type': 'live_screen', 'request': 'stop', 'data': ''}
         self.sock.sendall(json.dumps(message).encode('utf-8'))
-        self.get_thread.stop()
-        self.get_thread.quit()
-        self.get_thread.wait()
-        self.get_thread = None
+        if self.get_thread:
+            self.get_thread.stop()
+            self.get_thread.quit()
+            self.get_thread.wait()
+            self.get_thread = None
 
         logging.debug('finished get thread')
-
-        self.render_thread.stop()
-        self.render_thread.quit()
-        self.render_thread.wait()
-        self.render_thread = None
+        if self.render_thread:
+            self.render_thread.stop()
+            self.render_thread.quit()
+            self.render_thread.wait()
+            self.render_thread = None
 
         self.stop_time = time.time()
         logging.debug('frame: {}'.format((self.count_frame - 10)))
@@ -100,7 +99,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
     def closeEvent(self, event):
         message_to_send = {'type': 'live_screen',
                            'request': 'stop', 'data': ''}
-        self.sock.sendall(json.dumps(message_to_send).encode('utf-8'))
+        self.sock.sendall(json.dumps(message_to_send).encode(('utf8')))
         if self.get_thread:
             self.get_thread.stop()
             self.get_thread.quit()
@@ -109,7 +108,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
         if self.render_thread:
             self.render_thread.stop()
             self.render_thread.quit()
-            self.render_thread.wait()  
+            self.render_thread.wait()
 
     # threading
     class GetScreenshotThread(QThread):
@@ -132,34 +131,41 @@ class LiveScreenDialog(QtWidgets.QDialog):
             while keep_running:
                 self.mutex.lock()
 
-                properties = b''
-                properties = sock.recv(54)
-                if properties:
+                try:
+                    properties = sock.recv(54)
+                except:
+                    pass
+                else:
+                    logging.debug('properties = {}'.format(properties))
                     properties = json.loads(properties.decode('utf-8'))
-                    img_size = int(properties['size'])
+                    img_size = int(properties["size"])
                     w = int(properties['w'])
                     h = int(properties['h'])
                     data = b''
                     img = b''
-                    
+
                     while len(img) < img_size:
-                        data = sock.recv(img_size)
-                        img += data
+                        try:
+                            data = sock.recv(img_size)
+                        except:
+                            pass
+                        else:
+                            img += data
                     img_format = Image.frombytes(
-                        mode='RGB', size=(w, h), data=img)
+                        mode="RGB", size=(w, h), data=img)
                     convertToQtFormat = ImageQt(img_format)
                     p = convertToQtFormat.scaled(
                         QSize(700, 393), Qt.KeepAspectRatio)
                     self.queue.put(p)
-                
+
                 keep_running = self.keep_running
                 self.mutex.unlock()
 
-        def setup_tunnel(self, sock):
-            sock.listen(100)
-            conn, addr = sock.accept()
-            conn.setblocking(True)
-            return conn
+        def setup_tunnel(self, tcpsock):
+            tcpsock.listen(100)
+            tcpsock_connection, tcpsock_address = tcpsock.accept()
+            tcpsock_connection.setblocking(False)
+            return tcpsock_connection
 
     class RenderThread(QThread):
         change_pixmap = Signal(QImage)

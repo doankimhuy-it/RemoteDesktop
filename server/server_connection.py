@@ -101,6 +101,7 @@ class ServerConnection:
                 self.stop_connect(sock)
             else:
                 if recv_data:
+                    logging.debug('Raw Message from client {}'.format(recv_data))
                     message = json.loads(recv_data)
                     logging.debug('Message from {}: {}'.format(addr, message))
                     self.handle_message(sock, message)

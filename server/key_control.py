@@ -39,9 +39,9 @@ class KeyControl:
             self.locked = False
 
     def do_task(self, request, data):
-        # if not self.listener:
-        self.listener = keyboard.Listener(
-            on_press=self.on_press)
+        if not self.listener:
+            self.listener = keyboard.Listener(
+                on_press=self.on_press)
 
         if request == 'hook_key':
             if not self.hooked:

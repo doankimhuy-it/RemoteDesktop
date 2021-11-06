@@ -14,16 +14,16 @@ class LiveScreen:
         self.sending_thread = None
 
     def do_task(self, request, data):
-        if request == 'start':
-            if not self.sending_thread:
-                self.sending_thread = self.SendingThread(self.sock.getpeername()[0], data)
-                self.sending_thread.start()
         if request == 'stop':
             if self.sending_thread:
                 self.sending_thread.stop()
                 self.sending_thread.quit()
                 self.sending_thread.wait()
                 self.sending_thread = None
+        elif request == 'start':
+            if not self.sending_thread:
+                self.sending_thread = self.SendingThread(self.sock.getpeername()[0], data)
+                self.sending_thread.start()
 
     class SendingThread(QThread):
         def __init__(self, host, port):
@@ -45,16 +45,16 @@ class LiveScreen:
             while keep_running:
                 self.mutex.lock()
                 self.send_img(connection)
-                QThread.msleep(15)
+                QThread.msleep(50)
                 keep_running = self.keep_running
                 self.mutex.unlock()
 
         def setup_tunnel(self):
-            sock = socket.socket(
+            tcpsock = socket.socket(
                 family=socket.AF_INET, type=socket.SOCK_STREAM)
-            sock.connect((self.host, self.port))
-            sock.setblocking(False)
-            return sock
+            tcpsock.connect((self.host, self.port))
+            tcpsock.setblocking(False)
+            return tcpsock
 
         def send_img(self, connection):
             screenshot = ImageGrab.grab()

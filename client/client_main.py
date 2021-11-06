@@ -53,7 +53,7 @@ class Client:
         elif (self.client_connection.connection_status == STATUS_CONNECTED):
             self.window.change_gui_status(STATUS_CONNECTED)
             # send ping request after every 500ms to check server's signal
-            self.client_connection.send_message({'type': 'connection', 'request': 'ping', 'data': ''})
+            #self.client_connection.send_message({'type': 'connection', 'request': 'ping', 'data': ''})
 
     def on_quit(self):
         if self.client_connection.connection_status == STATUS_CONNECTING \
