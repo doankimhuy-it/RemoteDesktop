@@ -24,29 +24,47 @@ class FileManager:
         self.sock.sendall('\r\n'.encode('utf-8'))
 
     def get_file_directory(self, name):
-        if (os.path.isdir(name)):
-            print(name)
-            for (root, dirs, files) in os.walk(name):
-                data = dirs + files
-                dir = '|'.join(data)
-                message = dir
-                logging.debug(message)
+        if os.path.isdir(name):
+            try:
+                os.listdir(name)
+            except:
+                message = '??'
                 self.sock.sendall(message.encode('utf-8'))
-                self.sock.sendall('\r\n'.encode('utf-8'))
-                break
+                logging.debug('Error processing selected item')
+            else:
+                for (root, dirs, files) in os.walk(name):
+                    data = dirs + files
+                    dir = '|'.join(data)
+                    message = dir
+                    logging.debug(message)
+                    self.sock.sendall(message.encode('utf-8'))
+                    self.sock.sendall('\r\n'.encode('utf-8'))
+                    break
         elif os.path.isfile(name):
             message = '??'
             self.sock.sendall(message.encode('utf-8'))
-            logging.debug('sent')
+            logging.debug('Error processing selected item')
 
     def copy_file(self, path):
-        file = open(path, 'wb')
-        data = self.sock.recv(4096)
-        while data and data[-2:] != b'\r\n':
-            file.write(data)
+        try:
+            file = open(path, 'wb')
+        except:
+            tmp = path.split('\\')
+            correct_path = '\\'.join(tmp[:-2]) + '\\' + tmp[-1]
+            file = open(correct_path, 'wb')
             data = self.sock.recv(4096)
-        file.write(data[:-2])
-        file.close()
+            while data and data[-2:] != b'\r\n':
+                file.write(data)
+                data = self.sock.recv(4096)
+            file.write(data[:-2])
+            file.close()
+        else:
+            data = self.sock.recv(4096)
+            while data and data[-2:] != b'\r\n':
+                file.write(data)
+                data = self.sock.recv(4096)
+            file.write(data[:-2])
+            file.close()
 
     def delete_file(self, name):
         if os.path.exists(name) and os.path.isfile(name):

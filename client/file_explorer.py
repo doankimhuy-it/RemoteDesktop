@@ -74,10 +74,8 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.index_path = 0
         self.path = ''
 
-    # function test right click
     def open_context_menu(self):
         self.menu.exec(QtGui.QCursor.pos())
-    # end test
 
     def click_clear_button(self):
         self.tree_model.clear()
@@ -104,16 +102,16 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
             self.root_node.appendRow(rootName)
 
     def click_copy_button(self):
+        if self.path == '':
+            ClientWindow.show_error('Select a directory for copying', title='Error')
+            return
 
         file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'C:\\', 'All files (*.*)')
         file_name = file[0]
         name = ntpath.basename(file_name)
 
-        if name == '' or self.path == '':
-            if self.path == '':
-                ClientWindow.show_error('Select a directory for copying', title='Error')
-            else:
-                ClientWindow.show_error('Choose a file to copy', title='Error')
+        if name == '':
+            ClientWindow.show_error('Choose a file to copy', title='Error')
             return
 
         message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': '{}'.format(self.path + '\\' + name)}
@@ -143,7 +141,6 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
 
     @QtCore.Slot(QtCore.QModelIndex)
     def click_get_child_dir(self):
-
         self.index_path = self.tree_view.selectedIndexes()[0]
         check_update = self.index_path.model().itemFromIndex(self.index_path).check_update
         if check_update == True:
@@ -158,7 +155,8 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         data = ''
         message_recvd = self.sock.recv(4096).decode('utf-8')
         if message_recvd == '??':
-            logging.debug('Return because it is not a directory')
+            logging.debug('Cannot process selected item')
+            logging.debug(self.path)
             return
         while message_recvd and message_recvd[-2:] != '\r\n':
             data += message_recvd

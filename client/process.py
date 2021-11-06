@@ -184,9 +184,11 @@ class ProcessDialog(QtWidgets.QDialog):
                 if value in str(pid):
                     newlist.append([name, pid])
         if not newlist:
-            errbox = QtWidgets.QMessageBox(self)
-            errbox.setText('Not found')
-            errbox.exec_()
+            errbox = QtWidgets.QMessageBox()
+            errbox.setText('No processes found')
+            errbox.setWindowTitle('Warning')
+            errbox.setIcon(QtWidgets.QMessageBox.Information)
+            errbox.exec()
         else:
             self.list_process_data = newlist
             self.set_data()
