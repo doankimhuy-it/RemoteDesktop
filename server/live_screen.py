@@ -1,12 +1,8 @@
 from PIL import ImageGrab
 import socket
-import logging
 import json
 
 from PySide6.QtCore import QThread, QMutex
-
-
-logging.basicConfig(level=logging.DEBUG)
 
 class LiveScreen:
     def __init__(self, sock):

@@ -1,8 +1,5 @@
 import sys
 from PySide6 import QtCore, QtWidgets, QtGui
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 STATUS_DISCONNECTED = 0
 STATUS_CONNECTED = 1
