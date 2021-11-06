@@ -23,6 +23,7 @@ class Server:
                 target=self.server_connection.start_listen)
             connection_thread.start()
             self.window.update_gui_timer.start(500)
+            print(self.server_connection.connection_status)
         else:
             self.server_connection.stop_listen()
             self.window.listen_button.setText('Start Listening')

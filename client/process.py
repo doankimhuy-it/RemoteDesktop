@@ -2,6 +2,7 @@ import json
 import socket
 import sys
 from PySide6 import QtCore, QtWidgets
+import logging
 import operator
 
 class TableModel(QtCore.QAbstractTableModel):
@@ -144,11 +145,12 @@ class ProcessDialog(QtWidgets.QDialog):
     def click_view_button(self):
         self.get_process_list()
         self.set_data()
+        logging.debug('Done')
 
     def click_kill_process(self):
         index = self.main_widget.selectedIndexes()
         if not index:
-            pass
+            logging.debug('No process selected')
         else:
             cell = index[0]
             row = cell.row()
@@ -197,5 +199,6 @@ class ProcessDialog(QtWidgets.QDialog):
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
     window = ProcessDialog(0)
+    # print(window.list_process_data)
     window.show()
     sys.exit(app.exec())

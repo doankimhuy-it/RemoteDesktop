@@ -6,8 +6,11 @@ from PIL import Image
 import sys
 import socket
 import json
+import logging
 import time
 import queue
+
+logging.basicConfig(level=logging.DEBUG)
 
 class LiveScreenDialog(QtWidgets.QDialog):
     def __init__(self, sock):
@@ -45,6 +48,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
     def set_image(self, image):
         self.count_frame += 1
         if self.count_frame == 10:
+            logging.debug('10!')
             self.start_time = time.time()
         self.picture_box.setPixmap(QPixmap.fromImage(image))
 
@@ -79,12 +83,19 @@ class LiveScreenDialog(QtWidgets.QDialog):
         self.get_thread.wait()
         self.get_thread = None
 
+        logging.debug('finished get thread')
+
         self.render_thread.stop()
         self.render_thread.quit()
         self.render_thread.wait()
         self.render_thread = None
 
         self.stop_time = time.time()
+        logging.debug('frame: {}'.format((self.count_frame - 10)))
+        logging.debug('start: {}'.format((self.start_time)))
+        logging.debug('stop: {}'.format((self.stop_time)))
+        logging.debug('time: {}'.format((self.stop_time - self.start_time)))
+        logging.debug('fps is: {}'.format((self.count_frame - 10) / (self.stop_time - self.start_time)))
 
     def closeEvent(self, event):
         message_to_send = {'type': 'live_screen',

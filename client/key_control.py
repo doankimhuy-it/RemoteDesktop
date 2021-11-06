@@ -1,8 +1,11 @@
 from PySide6 import QtWidgets
 from PySide6.QtCore import QThread, Signal, QMutex
+import logging
 import json
 import sys
 import socket
+
+logging.basicConfig(level=logging.DEBUG)
 
 class KeyControlDialog(QtWidgets.QDialog):
     def __init__(self, sock):
@@ -69,6 +72,7 @@ class KeyControlDialog(QtWidgets.QDialog):
         message_to_send = {'type': 'key_control',
                            'request': 'unhook_key', 'data': ''}
         self.sock.sendall(json.dumps(message_to_send).encode(('utf-8')))
+        logging.debug('unhook')
 
     def receive_data(self, key):
         self.result_box.setText(str(self.result_box.toPlainText()) + key)
@@ -92,9 +96,13 @@ class KeyControlDialog(QtWidgets.QDialog):
                            'request': 'stop', 'data': ''}
         self.sock.sendall(json.dumps(message_to_send).encode(('utf8')))
         if self.get_thread:
+            logging.debug('start stop')
             self.get_thread.stop()
+            logging.debug('start quit')
             self.get_thread.quit()
+            logging.debug('start wait')
             self.get_thread.wait()
+            logging.debug('wait done')
 
     class GettingThread(QThread):
         key_pressed = Signal(str)
@@ -104,6 +112,7 @@ class KeyControlDialog(QtWidgets.QDialog):
             super().__init__()
 
         def run(self):
+            logging.debug('start')
             self.sock = self.setup_tunnel(self.tcpsock)
             self.keep_running = True
             keep_running = self.keep_running

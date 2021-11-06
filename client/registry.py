@@ -2,7 +2,10 @@ import json
 import socket
 import os
 import sys
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets, QtGui
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class RegistryDialog(QtWidgets.QDialog):
@@ -118,6 +121,7 @@ class RegistryDialog(QtWidgets.QDialog):
         self.sock.sendall(json.dumps(message).encode('utf8'))
 
         s = self.sock.recv(4096).decode('utf8')
+        print(s)
         self.return_message_box.append(s)
 
     def click_clear_box(self):

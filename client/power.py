@@ -1,6 +1,9 @@
 import json
 import sys
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets, QtGui
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 class PowerDialog(QtWidgets.QDialog):
     def __init__(self, sock):

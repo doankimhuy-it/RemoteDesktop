@@ -1,3 +1,4 @@
+import logging
 from subprocess import *
 import os
 import string
@@ -13,25 +14,30 @@ class FileManager:
             check = os.path.exists(path)
             if check:
                 for (root, dirs, files) in os.walk(path):
+                    print(root)
                     dir.append(root)
                     break
         my_dir = "|".join(dir)
+        print(my_dir)
         message = my_dir
         self.sock.sendall(message.encode('utf-8'))
         self.sock.sendall('\r\n'.encode('utf-8'))
 
     def get_file_directory(self, name):
         if (os.path.isdir(name)):
+            print(name)
             for (root, dirs, files) in os.walk(name):
                 data = dirs + files
                 dir = '|'.join(data)
                 message = dir
+                logging.debug(message)
                 self.sock.sendall(message.encode('utf-8'))
                 self.sock.sendall('\r\n'.encode('utf-8'))
                 break
         elif os.path.isfile(name):
             message = '??'
             self.sock.sendall(message.encode('utf-8'))
+            logging.debug('sent')
 
     def copy_file(self, path):
         file = open(path, 'wb')

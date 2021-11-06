@@ -86,6 +86,7 @@ class RegistryEdit:
             fin.write(data)
             fin.close()
             s = sys.path[0] + '\\fileReg.reg'
+            print(s)
             is_successful = False
             try:
                 subprocess.run('reg import \"' + s + '\"', timeout=20)
@@ -94,9 +95,10 @@ class RegistryEdit:
                 is_successful = False
             if is_successful:
                 s = 'Registry key successfully created'
+                print(s)
             else:
                 s = 'Failed to create registry key'
-
+                print(s)
 
         elif request == 'direct_edit':  # send multiple registry data
             s = data

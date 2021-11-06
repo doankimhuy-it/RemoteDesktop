@@ -2,6 +2,7 @@ from client_base_gui import ClientWindow
 from PySide6 import QtWidgets, QtGui, QtCore
 import sys
 import json
+import logging
 import ntpath
 
 class StandardItem(QtGui.QStandardItem):
@@ -73,8 +74,10 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.index_path = 0
         self.path = ''
 
+    # function test right click
     def open_context_menu(self):
         self.menu.exec(QtGui.QCursor.pos())
+    # end test
 
     def click_clear_button(self):
         self.tree_model.clear()
@@ -128,11 +131,13 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         index_path = self.tree_view.selectedIndexes()[0]
         path = index_path.model().itemFromIndex(index_path).path
         message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': path}
+        logging.debug(message_to_send)
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
     def click_delete_button(self):
         message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': self.path}
+        logging.debug(message_to_send)
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
@@ -153,6 +158,7 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         data = ''
         message_recvd = self.sock.recv(4096).decode('utf-8')
         if message_recvd == '??':
+            logging.debug('Return because it is not a directory')
             return
         while message_recvd and message_recvd[-2:] != '\r\n':
             data += message_recvd
