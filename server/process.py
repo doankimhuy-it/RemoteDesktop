@@ -40,4 +40,7 @@ class Process:
         return (gone, alive)
 
     def start_process(self, process):
-        psutil.Popen(str(process))
+        try:
+            psutil.Popen(str(process))
+        except FileNotFoundError:
+            pass

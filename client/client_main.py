@@ -19,9 +19,8 @@ class Client:
             port = self.window.port_textbox.text()
             pos = 0
             if self.window.port_validator.validate(port, pos)[0] != self.window.port_validator.Acceptable:
-                self.window.show_error(
-                    'Invalid Address', 'Invalid Port')
-                return -1
+                ClientWindow.show_error('Please enter a valid port', title='Invalid Port')
+                return
             port = int(port)
             # try to connect to server for the first time, after disconnecting or timing out
             # turn status to connecting
@@ -31,7 +30,7 @@ class Client:
             self.client_connection.start_connection(host, port)
 
             # start timer - update GUI and send sample data to server (PING)
-            self.window.update_gui_timer.start(500)
+            self.window.update_gui_timer.start(2000)
 
         elif (self.client_connection.connection_status == STATUS_CONNECTED):
             # user choose to close the connection
@@ -49,14 +48,12 @@ class Client:
             # if server loses connection to client, it will inform the client
             if (self.client_connection.lost_connection == True):
                 self.client_connection.lost_connection = False
-                self.window.show_error(
-                    'Lost connection', 'Lost connection to server')
+                ClientWindow.show_error('Lost connection to server', title='Lost connection')
             self.window.change_gui_status(STATUS_DISCONNECTED)
         elif (self.client_connection.connection_status == STATUS_CONNECTED):
             self.window.change_gui_status(STATUS_CONNECTED)
             # send ping request after every 500ms to check server's signal
-            self.client_connection.send_message(
-                {'type': 'connection', 'request': 'ping', 'data': ''})
+            self.client_connection.send_message({'type': 'connection', 'request': 'ping', 'data': ''})
 
     def on_quit(self):
         if self.client_connection.connection_status == STATUS_CONNECTING \

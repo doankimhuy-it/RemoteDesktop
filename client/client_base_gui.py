@@ -42,8 +42,9 @@ class ClientWindow(QtWidgets.QMainWindow):
         self.connection_status.setStyleSheet(
             "QLabel { border: 1.5px solid black;font-weight: bold; color : red; }")
 
-    def show_error(self, message, title='Error', width=None, info_icon=None):
-        message_box = QtWidgets.QMessageBox(self)
+    @staticmethod
+    def show_error(message, title='Error', width=None, info_icon=None):
+        message_box = QtWidgets.QMessageBox()
         message_box.setText(message)
         message_box.setWindowTitle(title)
         if width:

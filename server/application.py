@@ -31,6 +31,7 @@ class Application(Process):
         return True
 
     def send_process_list(self):
+        self.list_app_data = []
         EnumWindows(EnumWindowsProc(self.foreach_window), 0)
         for proc in self.list_app_data:
             try:

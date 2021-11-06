@@ -128,7 +128,7 @@ class ServerConnection:
         elif type == 'process':
             self.process_exec.do_task(request, data)
         elif type == 'key_control':
-            self.key_control_exec.do_task(request)
+            self.key_control_exec.do_task(request, data)
         elif type == 'mac_address':
             self.mac_exec.do_task()
         elif type == 'power':

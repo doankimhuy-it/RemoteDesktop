@@ -1,4 +1,4 @@
-import time
+from client_base_gui import ClientWindow
 from PySide6 import QtWidgets, QtGui, QtCore
 import sys
 import json
@@ -22,106 +22,89 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.setWindowTitle("File Explorer")
         self.resize(500, 400)
 
-        self.treeView = QtWidgets.QTreeView(self)
-        self.treeView.setHeaderHidden(True)
-        self.treeView.resize(320, 400)
+        self.tree_view = QtWidgets.QTreeView(self)
+        self.tree_view.setHeaderHidden(True)
+        self.tree_view.resize(320, 400)
 
-        self.treeModel = QtGui.QStandardItemModel()
-        self.rootNode = self.treeModel.invisibleRootItem()
+        self.tree_model = QtGui.QStandardItemModel()
+        self.root_node = self.tree_model.invisibleRootItem()
 
-        self.treeView.setModel(self.treeModel)
-        self.treeView.expandAll()
-        self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        #begin test right click
-        self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.treeView.customContextMenuRequested.connect(self.openContextMenu)
+        self.tree_view.setModel(self.tree_model)
+        self.tree_view.expandAll()
+        self.tree_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        # begin test right click
+        self.tree_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tree_view.customContextMenuRequested.connect(self.open_context_menu)
 
-        self.myMenu = QtWidgets.QMenu('Menu', self)
-        delete_btn = QtGui.QAction('Delete',self)
-        delete_btn.triggered.connect(self.right_click_delete_button)
-        self.myMenu.addAction(delete_btn)
-        #end test right click
-        self.treeView.clicked.connect(self.click_get_child_dir)
+        self.menu = QtWidgets.QMenu('Menu', self)
+        delete_action = QtGui.QAction('Delete', self)
+        delete_action.triggered.connect(self.right_click_delete_button)
+        self.menu.addAction(delete_action)
+        # end test right click
+        self.tree_view.clicked.connect(self.click_get_child_dir)
 
-        # self.model = QtWidgets.QFileSystemModel()
-        # self.model.setRootPath((QtCore.QDir.rootPath()))
-        # self.treeView.setModel(self.model)
-        # self.treeView.setSortingEnabled(True)
-        # self.rootNode = self.model.invisibleRootItem()
+        self.get_view_button = QtWidgets.QPushButton(self)
+        self.get_view_button.move(330, 20)
+        self.get_view_button.setFixedSize(160, 50)
+        self.get_view_button.setText('View remote\'s disks')
 
-        self.getView = QtWidgets.QPushButton(self)
-        self.getView.move(350, 20)
-        self.getView.setFixedWidth(120)
-        self.getView.setText('View directory')
+        self.copy_button = QtWidgets.QPushButton(self)
+        self.copy_button.move(330, 80)
+        self.copy_button.setFixedSize(160, 50)
+        self.copy_button.setText('Copy to selected folder')
 
-        self.resetButton = QtWidgets.QPushButton(self)
-        self.resetButton.move(350, 80)
-        self.resetButton.setFixedWidth(120)
-        self.resetButton.setText('Reset')
+        self.delete_button = QtWidgets.QPushButton(self)
+        self.delete_button.move(330, 140)
+        self.delete_button.setFixedSize(160, 50)
+        self.delete_button.setText('Delete selected file')
 
-        self.copyButton = QtWidgets.QPushButton(self)
-        self.copyButton.move(350, 140)
-        self.copyButton.setFixedWidth(120)
-        self.copyButton.setText('Copy')
+        self.clear_button = QtWidgets.QPushButton(self)
+        self.clear_button.move(330, 220)
+        self.clear_button.setFixedSize(160, 50)
+        self.clear_button.setText('Clear view')
 
-        self.deleteButton = QtWidgets.QPushButton(self)
-        self.deleteButton.move(350, 200)
-        self.deleteButton.setFixedWidth(120)
-        self.deleteButton.setText('Delete')
+        self.label = QtWidgets.QLabel(self)
+        self.label.move(330, 280)
+        self.label.setFixedSize(160, 80)
+        self.label.setWordWrap(True)
+        self.label.setText('*Notes*\nChoose destination folder before copying.\nDelete files only.')
 
-        self.inputText = QtWidgets.QLineEdit(self)
-        self.inputText.move(350, 260)
-        self.inputText.setFixedWidth(120)
-        self.inputText.setPlaceholderText('Enter path to delete')
-        self.inputText.setText('')
-
-        self.clearButton = QtWidgets.QPushButton(self)
-        self.clearButton.move(350, 320)
-        self.clearButton.setFixedWidth(120)
-        self.clearButton.setText('Clear')
-
-        self.getView.clicked.connect(self.click_get_button)
-        self.resetButton.clicked.connect(self.click_reset_button)
-        self.copyButton.clicked.connect(self.click_copy_button)
-        self.deleteButton.clicked.connect(self.click_delete_button)
-        self.clearButton.clicked.connect(self.click_clear_button)
+        self.get_view_button.clicked.connect(self.click_get_view_button)
+        self.copy_button.clicked.connect(self.click_copy_button)
+        self.delete_button.clicked.connect(self.click_delete_button)
+        self.clear_button.clicked.connect(self.click_clear_button)
 
         self.index_path = 0
         self.path = ''
 
-    #function test right click
-    def openContextMenu(self):
-        self.myMenu.exec_(QtGui.QCursor.pos())
-    #end test
+    # function test right click
+    def open_context_menu(self):
+        self.menu.exec(QtGui.QCursor.pos())
+    # end test
 
     def click_clear_button(self):
-        self.treeModel.clear()
-        self.rootNode = self.treeModel.invisibleRootItem()
+        self.tree_model.clear()
+        self.root_node = self.tree_model.invisibleRootItem()
 
-    def click_reset_button(self):
-        self.treeModel.clear()
-        self.rootNode = self.treeModel.invisibleRootItem()
-        self.click_get_button()
+    def click_get_view_button(self):
+        self.tree_model.clear()
+        self.root_node = self.tree_model.invisibleRootItem()
 
-    def click_get_button(self):
-        self.treeModel.clear()
-        self.rootNode = self.treeModel.invisibleRootItem()
-        
         message_to_send = {'type': 'file_explorer', 'request': 'get', 'data': ''}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
         data = ''
-        message_recvd = self.sock.recv(4096).decode('utf8')
+        message_recvd = self.sock.recv(4096).decode('utf-8')
         while message_recvd and message_recvd[-2:] != '\r\n':
             data += message_recvd
-            message_recvd = self.sock.recv(4096).decode('utf8')
+            message_recvd = self.sock.recv(4096).decode('utf-8')
         data += message_recvd[:-2]
         list_recvd = data.split('|')
         for data in list_recvd:
             rootName = StandardItem(data)
             rootName.path += data
-            self.rootNode.appendRow(rootName)
+            self.root_node.appendRow(rootName)
 
     def click_copy_button(self):
 
@@ -130,6 +113,10 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         name = ntpath.basename(file_name)
 
         if name == '' or self.path == '':
+            if self.path == '':
+                ClientWindow.show_error('Select a directory for copying', title='Error')
+            else:
+                ClientWindow.show_error('Choose a file to copy', title='Error')
             return
 
         message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': '{}'.format(self.path + '\\' + name)}
@@ -144,7 +131,7 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.sock.sendall(b'\r\n')
 
     def right_click_delete_button(self):
-        index_path = self.treeView.selectedIndexes()[0]
+        index_path = self.tree_view.selectedIndexes()[0]
         path = index_path.model().itemFromIndex(index_path).path
         message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': path}
         logging.debug(message_to_send)
@@ -152,64 +139,41 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         self.sock.sendall(message_to_send.encode('utf-8'))
 
     def click_delete_button(self):
-        message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': self.inputText.text()}
+        message_to_send = {'type': 'file_explorer', 'request': 'delete', 'data': self.path}
         logging.debug(message_to_send)
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
-        # data = ''
-        # message_recvd = self.sock.recv(4096).decode('utf8')
-        # while message_recvd and message_recvd[-2:] != '\r\n':
-        #     data += message_recvd
-        #     message_recvd = self.sock.recv(4096).decode('utf8')
-        # data += message_recvd[:-2]
-
-    # def keyPressEvent(self, event):
-
-    #     if event.key() == QtWidgets.Key_Space or event.key() == QtWidgets.Key_Return:
-    #         index = self.selectedIndexes()[0].model()
-    #         crawler = index.model().itemFromIndex(index)
-    #     QtWidgets.QTreeView.keyPressEvent(self, event)
-    #     return index
-
     @QtCore.Slot(QtCore.QModelIndex)
-    def click_get_child_dir(self, val):
-        # indexItem = self.treeView.model.index(index.row(), 0, index.parent())
-        # path = self.treeView.model.fileName(indexItem)
-        print('---------')
-        self.index_path = self.treeView.selectedIndexes()[0]
+    def click_get_child_dir(self):
+
+        self.index_path = self.tree_view.selectedIndexes()[0]
         check_update = self.index_path.model().itemFromIndex(self.index_path).check_update
         if check_update == True:
             return
         self.path = self.index_path.model().itemFromIndex(self.index_path).path
         self.index_path.model().itemFromIndex(self.index_path).check_update = True
-        print(self.path)
-        print('----------')
+
         message_to_send = {'type': 'file_explorer', 'request': 'get_child_dir', 'data': '{}'.format(self.path)}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
 
         data = ''
-        message_recvd = self.sock.recv(4096).decode('utf8')
-        if message_recvd == ' ':
-            logging.debug('return because it is not a directory')
+        message_recvd = self.sock.recv(4096).decode('utf-8')
+        if message_recvd == '??':
+            logging.debug('Return because it is not a directory')
             return
         while message_recvd and message_recvd[-2:] != '\r\n':
             data += message_recvd
-            message_recvd = self.sock.recv(4096).decode('utf8')
+            message_recvd = self.sock.recv(4096).decode('utf-8')
         data += message_recvd[:-2]
         list_recvd = data.split('|')
-        print(list_recvd)
+
         for data in list_recvd:
-            #test if i can change the name
             rootName = StandardItem(data)
-            #test rootName.path
             rootName.path = rootName.path + self.path + '\\' + data
-            print(rootName.path + '|||||||||||')
-            index = self.treeView.selectedIndexes()[0]
-            #test get path
-            # txt = index.model().itemFromIndex(index).path + '\\' + data
-            # print(txt)
+
+            index = self.tree_view.selectedIndexes()[0]
             index.model().itemFromIndex(index).appendRow(rootName)
 
 

@@ -1,4 +1,3 @@
-import json
 import logging
 from subprocess import *
 import os
@@ -8,14 +7,12 @@ class FileManager:
     def __init__(self, sock):
         self.sock = sock
 
-    def get_base_file_directory(self):
+    def get_base_directory(self):
         dir = []
         for start_path in string.ascii_uppercase:
             path = '{}:\\'.format(start_path)
             check = os.path.exists(path)
             if check:
-                # (root, dirs, files) = os.walk(path)
-                # dir += (root, dirs, files)
                 for (root, dirs, files) in os.walk(path):
                     print(root)
                     dir.append(root)
@@ -38,7 +35,7 @@ class FileManager:
                 self.sock.sendall('\r\n'.encode('utf-8'))
                 break
         elif os.path.isfile(name):
-            message = ' '
+            message = '??'
             self.sock.sendall(message.encode('utf-8'))
             logging.debug('sent')
 
@@ -52,7 +49,7 @@ class FileManager:
         file.close()
 
     def delete_file(self, name):
-        if os.path.exists(name):
+        if os.path.exists(name) and os.path.isfile(name):
             os.remove(name)
 
     def do_task(self, request, data):
@@ -61,6 +58,6 @@ class FileManager:
         elif request == 'delete':
             self.delete_file(data)
         elif request == 'get':
-            self.get_base_file_directory()
+            self.get_base_directory()
         elif request == 'get_child_dir':
             self.get_file_directory(data)

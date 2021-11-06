@@ -3,7 +3,7 @@ import socket
 import logging
 import json
 
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QThread, QMutex
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -11,44 +11,61 @@ logging.basicConfig(level=logging.DEBUG)
 class LiveScreen:
     def __init__(self, sock):
         self.sock = sock
-        self.sending_thread = self.SendingThread()
+        self.sending_thread = None
 
     def do_task(self, request, data):
+        if request == 'start':
+            if not self.sending_thread:
+                self.sending_thread = self.SendingThread(self.sock.getpeername()[0], data)
+                self.sending_thread.start()
         if request == 'stop':
-            self.sending_thread.stop()
-        elif request == 'start':
-            self.sending_thread.start()
+            if self.sending_thread:
+                self.sending_thread.stop()
+                self.sending_thread.quit()
+                self.sending_thread.wait()
+                self.sending_thread = None
 
     class SendingThread(QThread):
-        def __init__(self):
+        def __init__(self, host, port):
             super().__init__()
+            self.mutex = QMutex()
+            self.host = host
+            self.port = port
+            self.keep_running = True
 
         def stop(self):
-            self.keepRunning = False
+            self.mutex.lock()
+            self.keep_running = False
+            self.mutex.unlock()
 
         def run(self):
             connection = self.setup_tunnel()
-            self.keepRunning = True
-            while self.keepRunning:
+            keep_running = self.keep_running
+
+            while keep_running:
+                self.mutex.lock()
                 self.send_img(connection)
-                QThread.msleep(5)
+                QThread.msleep(15)
+                keep_running = self.keep_running
+                self.mutex.unlock()
 
         def setup_tunnel(self):
-            tcpsock = socket.socket(
+            sock = socket.socket(
                 family=socket.AF_INET, type=socket.SOCK_STREAM)
-            tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            tcpsock.bind(('127.0.0.1', 23456))
-            tcpsock.listen(100)
-            tcpsock_connection, tcpsock_address = tcpsock.accept()
-            return tcpsock_connection
+            sock.connect((self.host, self.port))
+            sock.setblocking(False)
+            return sock
 
         def send_img(self, connection):
             screenshot = ImageGrab.grab()
-            message = screenshot.tobytes()
+            img_to_byte = screenshot.tobytes()
 
             w, h = screenshot.size
-            properties = {"size": len(message),
-                          "w": w,
-                          "h": h}
-            connection.sendall(json.dumps(properties).encode('utf-8'))
-            connection.sendall(message)
+            properties = {'size': format(len(img_to_byte), '08d'),
+                          'w': format(w, '08d'),
+                          'h': format(h, '08d')}
+            try:
+                connection.sendall(json.dumps(properties).encode('utf-8'))
+                connection.sendall(img_to_byte)
+            except:
+                pass
