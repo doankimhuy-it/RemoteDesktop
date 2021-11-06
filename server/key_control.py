@@ -2,7 +2,6 @@ import keyboard as kb
 from pynput import keyboard
 import json
 import socket
-import logging
 from PySide6.QtCore import QThread, QWaitCondition, QMutex
 
 class KeyControl:
@@ -20,7 +19,6 @@ class KeyControl:
 
         try:
             key_name = key.char
-            logging.debug('get key: {}'.format(key_name))
             self.send_thread.send(key_name)
         except:
             pass
@@ -63,15 +61,11 @@ class KeyControl:
         elif (request == 'stop'):
             self.do_task('unlock_key', '')
             self.do_task('unhook_key', '')
-
-            logging.debug('start stop')
-            self.send_thread.stop()
-            logging.debug('start quit')
-            self.send_thread.quit()
-            logging.debug('start wait')
-            self.send_thread.wait()
-            logging.debug('wait done')
-            self.send_thread = None
+            if self.send_thread:
+                self.send_thread.stop()
+                self.send_thread.quit()
+                self.send_thread.wait()
+                self.send_thread = None
 
     class SendingThread(QThread):
         def __init__(self, host, port):
@@ -90,15 +84,12 @@ class KeyControl:
                 key = self.key
                 self.mutex.unlock()
 
-                logging.debug('send key: {}'.format(key))
                 key_json = {'key': key}
                 self.sock.sendall(json.dumps(key_json).encode('utf-8'))
 
                 self.mutex.lock()
-                logging.debug('sending thread go to sleep')
                 self.condition.wait(self.mutex)
 
-                logging.debug('Get unlock in run')
                 keep_running = self.keep_running
                 self.mutex.unlock()
 
@@ -117,10 +108,7 @@ class KeyControl:
 
         def send(self, key):
             self.key = key
-            logging.debug('get to thread.send()')
             if not self.isRunning():
-                logging.debug('start sending thread')
                 self.start()
             else:
-                logging.debug('sending thread go wake')
                 self.condition.wakeOne()

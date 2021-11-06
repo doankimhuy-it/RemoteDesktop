@@ -1,6 +1,5 @@
 import socket
 import json
-import logging
 import selectors
 
 from application import Application
@@ -11,8 +10,6 @@ from power import Power
 from file_manager import FileManager
 from live_screen import LiveScreen
 from registry import RegistryEdit
-
-logging.basicConfig(level=logging.DEBUG)
 
 class ServerConnection:
     def __init__(self, host, port):
@@ -32,7 +29,6 @@ class ServerConnection:
 
         # set to start listening flag, 1 is one socket (server_sock)
         self.connection_status = 1
-        logging.debug('Listening on {} : {}'.format(self.host, self.port))
         while self.connection_status:
             try:
                 # timeout = 0: wait until event appear
@@ -46,7 +42,7 @@ class ServerConnection:
                     else:
                         self.service_connect(key, mask)
         if (not self.connection_status):
-            logging.debug('Child thread running listen task ended')
+            pass
 
     def stop_listen(self):
         s = self.sel.get_map()
@@ -56,14 +52,12 @@ class ServerConnection:
         socks = [file_obj[0] for file_obj in fileobjs if file_obj[3] != None]
 
         for sock in socks:
-            logging.debug('Stop connection with {}'.format(sock.getpeername()))
             sock.close()
             self.sel.unregister(sock)
         # self.server_sock.shutdown(socket.SHUT_RDWR)
         self.connection_status = 0
         self.server_sock.close()
         self.sel.unregister(self.server_sock)
-        logging.debug('Stop listening')
 
     def start_connect(self, sock):
         conn, addr = sock.accept()  # accpet connection from client
@@ -83,7 +77,6 @@ class ServerConnection:
         # register this connect to sel, with wait-event are both read & write
         self.sel.register(conn, events=event, data=data)
         self.connection_status += 1
-        logging.debug('Start connection with {}'.format(addr))
 
     def stop_connect(self, sock):
         self.sel.unregister(sock)
@@ -97,15 +90,12 @@ class ServerConnection:
             try:
                 recv_data = sock.recv(4096)  # read data
             except ConnectionResetError:
-                logging.debug('Lost connection from {}'.format(addr))
                 self.stop_connect(sock)
             else:
                 if recv_data:
                     message = json.loads(recv_data)
-                    logging.debug('Message from {}: {}'.format(addr, message))
                     self.handle_message(sock, message)
                 else:
-                    logging.debug('Closed connection to {}'.format(addr))
                     self.stop_connect(sock)
 
         elif mask & selectors.EVENT_WRITE:

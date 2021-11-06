@@ -1,11 +1,7 @@
 import json
 import socket
-import logging
-import threading
 
 from control_diag import ControlDiag
-
-logging.basicConfig(level=logging.DEBUG)
 
 STATUS_DISCONNECTED = 0
 STATUS_CONNECTED = 1
@@ -28,12 +24,9 @@ class ClientConnection:
         try:
             self.client_socket.connect((self.host, self.port))
         except (ConnectionRefusedError, TimeoutError) as e:
-            logging.debug('Cannot connect to host {}'.format(e))
             self.connection_status = STATUS_TIMEOUT
             return
         else:
-            logging.debug('Connected to server {}'.format(
-                self.client_socket.getpeername()))
             self.connection_status = STATUS_CONNECTED
             self.control_dialog = ControlDiag(self.client_socket)
             self.show_control_diag(is_visible=True)
@@ -43,14 +36,10 @@ class ClientConnection:
         try:
             self.client_socket.sendall(message)
         except:  # ConnectionAbortedError and ConnectionResetError
-            logging.debug('Lost connection from {}'.format(
-                self.client_socket.getpeername()))
             self.connection_status = STATUS_DISCONNECTED
             self.lost_connection = True
 
     def stop_connection(self):
-        logging.debug('Closed connection to {}'.format(
-            self.client_socket.getpeername()))
         end_message = {'type': 'connection',
                        'request': 'close_connection', 'data': ''}
         self.send_message(end_message)
