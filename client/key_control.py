@@ -15,13 +15,12 @@ class KeyControlDialog(QtWidgets.QDialog):
         self.init_ui()
         self.link_buttons()
 
-        tcpsock = socket.socket(
-                family=socket.AF_INET, type=socket.SOCK_STREAM)
-        tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        tcpsock.bind(('0.0.0.0', 0))
-        self.port = tcpsock.getsockname()[1]
+        key_recv_sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+        key_recv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        key_recv_sock.bind(('0.0.0.0', 44444))
+        self.port = 44444
 
-        self.get_thread = self.GettingThread(tcpsock)
+        self.get_thread = self.GettingThread(key_recv_sock)
         self.get_thread.key_pressed.connect(self.receive_data)
 
     def link_buttons(self):
@@ -88,33 +87,33 @@ class KeyControlDialog(QtWidgets.QDialog):
     def click_unlock_button(self):
         message_to_send = {'type': 'key_control',
                            'request': 'unlock_key', 'data': ''}
-        self.sock.sendall(json.dumps(message_to_send).encode(('utf8')))
+        self.sock.sendall(json.dumps(message_to_send).encode(('utf-8')))
 
     # overrided
     def closeEvent(self, event):
-        message_to_send = {'type': 'key_control',
-                           'request': 'stop', 'data': ''}
-        self.sock.sendall(json.dumps(message_to_send).encode(('utf8')))
+        message_to_send = {'type': 'key_control', 'request': 'stop', 'data': ''}
+        self.sock.sendall(json.dumps(message_to_send).encode(('utf-8')))
         if self.get_thread:
             logging.debug('start stop')
             self.get_thread.stop()
             logging.debug('start quit')
             self.get_thread.quit()
             logging.debug('start wait')
-            #self.get_thread.wait()
+            # self.get_thread.wait()
             logging.debug('wait done')
             self.get_thread = None
 
     class GettingThread(QThread):
         key_pressed = Signal(str)
-        def __init__(self, tcpsock):
-            self.tcpsock = tcpsock
+
+        def __init__(self, sock):
+            self.key_recv_sock = sock
             self.mutex = QMutex()
             super().__init__()
 
         def run(self):
             logging.debug('start')
-            self.sock = self.setup_tunnel(self.tcpsock)
+            self.sock = self.setup_tunnel(self.key_recv_sock)
             self.keep_running = True
             keep_running = self.keep_running
             while (keep_running):

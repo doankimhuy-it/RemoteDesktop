@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 class LiveScreenDialog(QtWidgets.QDialog):
     def __init__(self, sock):
         super().__init__()
-        self.sock = sock
+        self.main_sock = sock
         self.init_ui()
 
         self.img_queue = queue.Queue()
@@ -51,19 +51,19 @@ class LiveScreenDialog(QtWidgets.QDialog):
 
     def click_start_button(self):
         if not self.get_thread:
-            tcpsock = socket.socket(
-                family=socket.AF_INET, type=socket.SOCK_STREAM)
-            tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            tcpsock.bind(('0.0.0.0', 0))
-            self.port = tcpsock.getsockname()[1]
-            self.get_thread = self.GetScreenshotThread(self.img_queue, tcpsock)
+            img_recv_sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+            img_recv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            img_recv_sock.bind(('0.0.0.0', 55555))
+            self.port = 55555
+            print(self.port)
+            self.get_thread = self.GetScreenshotThread(self.img_queue, img_recv_sock)
 
         if not self.render_thread:
             self.render_thread = self.RenderThread(self.img_queue)
             self.render_thread.change_pixmap.connect(self.set_image)
 
         message = {'type': 'live_screen', 'request': 'start', 'data': self.port}
-        self.sock.sendall(json.dumps(message).encode('utf-8'))
+        self.main_sock.sendall(json.dumps(message).encode('utf-8'))
         logging.debug('start send: {}'.format(message))
 
         self.get_thread.start()
@@ -75,7 +75,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
 
     def click_stop_button(self):
         message = {'type': 'live_screen', 'request': 'stop', 'data': ''}
-        self.sock.sendall(json.dumps(message).encode('utf-8'))
+        self.main_sock.sendall(json.dumps(message).encode('utf-8'))
         if self.get_thread:
             self.get_thread.stop()
             self.get_thread.quit()
@@ -98,7 +98,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
 
     def closeEvent(self, event):
         message_to_send = {'type': 'live_screen', 'request': 'stop', 'data': ''}
-        self.sock.sendall(json.dumps(message_to_send).encode(('utf8')))
+        self.main_sock.sendall(json.dumps(message_to_send).encode(('utf-8')))
         if self.get_thread:
             self.get_thread.stop()
             self.get_thread.quit()
@@ -137,7 +137,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
                 else:
                     logging.debug('properties = {}'.format(properties))
                     properties = json.loads(properties.decode('utf-8'))
-                    img_size = int(properties["size"])
+                    img_size = int(properties['size'])
                     w = int(properties['w'])
                     h = int(properties['h'])
                     data = b''
@@ -151,7 +151,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
                         else:
                             img += data
                     img_format = Image.frombytes(
-                        mode="RGB", size=(w, h), data=img)
+                        mode='RGB', size=(w, h), data=img)
                     convertToQtFormat = ImageQt(img_format)
                     p = convertToQtFormat.scaled(
                         QSize(700, 393), Qt.KeepAspectRatio)
@@ -160,9 +160,9 @@ class LiveScreenDialog(QtWidgets.QDialog):
                 keep_running = self.keep_running
                 self.mutex.unlock()
 
-        def setup_tunnel(self, tcpsock):
-            tcpsock.listen(100)
-            tcpsock_connection, tcpsock_address = tcpsock.accept()
+        def setup_tunnel(self, img_recv_sock):
+            img_recv_sock.listen(100)
+            tcpsock_connection, tcpsock_address = img_recv_sock.accept()
             tcpsock_connection.setblocking(False)
             return tcpsock_connection
 

@@ -40,7 +40,7 @@ class RegistryEdit:
             type = winreg.REG_SZ
         elif valueType == 'Binary':
             type = winreg.REG_BINARY
-            value = value.encode('utf8')
+            value = value.encode('utf-8')
         elif valueType == 'DWORD':
             type = winreg.REG_DWORD
             value = int(value)
@@ -127,4 +127,4 @@ class RegistryEdit:
                 else:
                     s = 'Error'
 
-            self.sock.sendall(s.encode('utf8'))
+            self.sock.sendall(s.encode('utf-8'))

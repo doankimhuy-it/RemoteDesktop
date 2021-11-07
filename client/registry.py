@@ -118,9 +118,9 @@ class RegistryDialog(QtWidgets.QDialog):
     def click_direct_send(self):
         message = {'type': 'reg_edit', 'request': 'direct_edit', 'data': self.operation_combo_box.currentText() + '~' + self.reg_addr.text() + '~'
                    + self.value_name.text() + '~' + self.value.text() + '~' + self.value_type_combo_box.currentText()}
-        self.sock.sendall(json.dumps(message).encode('utf8'))
+        self.sock.sendall(json.dumps(message).encode('utf-8'))
 
-        s = self.sock.recv(4096).decode('utf8')
+        s = self.sock.recv(4096).decode('utf-8')
         print(s)
         self.return_message_box.append(s)
 

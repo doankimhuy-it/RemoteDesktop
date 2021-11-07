@@ -52,7 +52,6 @@ class LiveScreen:
         def setup_tunnel(self):
             tcpsock = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
             tcpsock.connect((self.host, self.port))
-            tcpsock.setblocking(False)
             return tcpsock
 
         def send_img(self, connection):
