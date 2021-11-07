@@ -97,8 +97,7 @@ class LiveScreenDialog(QtWidgets.QDialog):
         logging.debug('fps is: {}'.format((self.count_frame - 10) / (self.stop_time - self.start_time)))
 
     def closeEvent(self, event):
-        message_to_send = {'type': 'live_screen',
-                           'request': 'stop', 'data': ''}
+        message_to_send = {'type': 'live_screen', 'request': 'stop', 'data': ''}
         self.sock.sendall(json.dumps(message_to_send).encode(('utf8')))
         if self.get_thread:
             self.get_thread.stop()

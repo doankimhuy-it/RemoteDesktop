@@ -28,7 +28,7 @@ class PowerDialog(QtWidgets.QDialog):
         self.sock.sendall(json.dumps(message_to_send).encode('utf-8'))
 
     def click_logoff_button(self):
-        message_to_send = {'request': 'logoff'}
+        message_to_send = {'type': 'power', 'request': 'logoff', 'data': ''}
         self.sock.sendall(json.dumps(message_to_send).encode('utf-8'))
 
 

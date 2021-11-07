@@ -45,13 +45,12 @@ class LiveScreen:
             while keep_running:
                 self.mutex.lock()
                 self.send_img(connection)
-                QThread.msleep(50)
+                QThread.msleep(10)
                 keep_running = self.keep_running
                 self.mutex.unlock()
 
         def setup_tunnel(self):
-            tcpsock = socket.socket(
-                family=socket.AF_INET, type=socket.SOCK_STREAM)
+            tcpsock = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
             tcpsock.connect((self.host, self.port))
             tcpsock.setblocking(False)
             return tcpsock
