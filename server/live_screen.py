@@ -34,9 +34,9 @@ class LiveScreen:
             self.keep_running = True
 
         def stop(self):
-            self.mutex.lock()
+            #self.mutex.lock()
             self.keep_running = False
-            self.mutex.unlock()
+            #self.mutex.unlock()
 
         def run(self):
             connection = self.setup_tunnel()
@@ -45,16 +45,14 @@ class LiveScreen:
             while keep_running:
                 self.mutex.lock()
                 self.send_img(connection)
-                QThread.msleep(10)
+                #QThread.msleep(10)
                 keep_running = self.keep_running
                 self.mutex.unlock()
 
         def setup_tunnel(self):
             tcpsock = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
             tcpsock.connect((self.host, self.port))
-            return tcpsock
 
-        def send_img(self, connection):
             screenshot = ImageGrab.grab()
             img_to_byte = screenshot.tobytes()
 
@@ -62,8 +60,16 @@ class LiveScreen:
             properties = {'size': format(len(img_to_byte), '08d'),
                           'w': format(w, '08d'),
                           'h': format(h, '08d')}
+            tcpsock.sendall(json.dumps(properties).encode('utf-8'))
+            logging.debug('sent properties')
+            logging.debug(properties)
+
+            return tcpsock
+
+        def send_img(self, connection):
+            screenshot = ImageGrab.grab()
+            img_to_byte = screenshot.tobytes()
             try:
-                connection.sendall(json.dumps(properties).encode('utf-8'))
                 connection.sendall(img_to_byte)
             except:
                 pass

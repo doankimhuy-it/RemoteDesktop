@@ -117,12 +117,14 @@ class FileExplorerDialog(QtWidgets.QDialog, QtWidgets.QMainWindow):
         message_to_send = {'type': 'file_explorer', 'request': 'copy', 'data': '{}'.format(self.path + '\\' + name)}
         message_to_send = json.dumps(message_to_send)
         self.sock.sendall(message_to_send.encode('utf-8'))
+        self.sock.recv(1)
+
+        logging.debug('start send file')
 
         fi = open(file_name, 'rb')
-        file_data = fi.read(4096)
-        while file_data:
-            self.sock.sendall(file_data)
-            file_data = fi.read(4096)
+        file_data = fi.read()
+        self.sock.sendall(file_data)
+
         self.sock.sendall(b'\r\n')
 
     def right_click_delete_button(self):

@@ -52,17 +52,19 @@ class FileManager:
             tmp = path.split('\\')
             correct_path = '\\'.join(tmp[:-2]) + '\\' + tmp[-1]
             file = open(correct_path, 'wb')
-            data = self.sock.recv(4096)
+            self.sock.sendall(b'1')
+            data = self.sock.recv(1024 * 1024)
             while data and data[-2:] != b'\r\n':
                 file.write(data)
-                data = self.sock.recv(4096)
+                data = self.sock.recv(1024 * 1024)
             file.write(data[:-2])
             file.close()
         else:
-            data = self.sock.recv(4096)
+            self.sock.sendall(b'1')
+            data = self.sock.recv(1024 * 1024)
             while data and data[-2:] != b'\r\n':
                 file.write(data)
-                data = self.sock.recv(4096)
+                data = self.sock.recv(1024 * 1024)
             file.write(data[:-2])
             file.close()
 

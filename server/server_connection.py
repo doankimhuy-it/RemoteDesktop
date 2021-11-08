@@ -89,6 +89,21 @@ class ServerConnection:
         self.sel.unregister(sock)
         self.connection_status -= 1
         sock.close()
+    
+    def split_str_to_2_list(self, data):
+        res = []
+        lst = data.split('}')
+        for item in lst[:-1]:
+            res.append(str(item + '}'))
+
+        ping = None
+        for i in res:
+            data = json.loads(i)
+            if data['request'] != 'ping':
+                return data
+            else:
+                ping = data 
+        return ping
 
     def service_connect(self, key, mask):
         sock = key.fileobj
@@ -101,10 +116,18 @@ class ServerConnection:
                 self.stop_connect(sock)
             else:
                 if recv_data:
-                    logging.debug('Raw Message from client {}'.format(recv_data))
-                    message = json.loads(recv_data)
-                    logging.debug('Message from {}: {}'.format(addr, message))
-                    self.handle_message(sock, message)
+                    tmp = json.loads(recv_data)
+                    if tmp['type'] == 'file_explorer':
+                        logging.debug('Message from {}: {}'.format(addr, tmp))
+                        self.handle_message(sock, tmp)
+                    else:
+                        message = self.split_str_to_2_list(recv_data.decode('utf-8'))
+                        logging.debug('Raw Message from client {}'.format(message))
+                        if not message:
+                            pass
+                        else:
+                            logging.debug('Message from {}: {}'.format(addr, message))
+                            self.handle_message(sock, message)
                 else:
                     logging.debug('Closed connection to {}'.format(addr))
                     self.stop_connect(sock)
